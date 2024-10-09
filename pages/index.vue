@@ -1,12 +1,12 @@
 <template>
   <div>
-    首页
+    <h1>预约界面</h1>
   </div>
 </template>
 
 <script>
 export default {
-
+  layouts: 'default'
 }
 </script>
 
