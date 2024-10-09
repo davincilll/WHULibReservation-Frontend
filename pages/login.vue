@@ -63,6 +63,9 @@ import { ref } from 'vue'
 
 export default {
   setup () {
+    definePageMeta({
+  layout: false,
+})
     const user = ref({
       username: '',
       password: '',
