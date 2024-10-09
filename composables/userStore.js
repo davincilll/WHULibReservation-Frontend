@@ -1,5 +1,5 @@
 import { defineStore } from "pinia";
-
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 export const userStore = defineStore("userStore", ()=>{
     const token = ref("")
     const setToken = (value) =>{

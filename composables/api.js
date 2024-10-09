@@ -30,7 +30,7 @@ export const apiCore = (url, options = {}) => {
                 }
             }
         },
-        onResponsError({response}){
+        onResponseError({response}){
                     if(import.meta.client){
                         nuxtApp.$toast.error(response._data.msg);
                     }else{
@@ -59,7 +59,9 @@ export const PostApi = (url, data = {}, options = {}) => {
             body: JSON.stringify(data),  // 将数据序列化为 JSON
             ...options  // 允许外部传递其他配置
         }).then((res) => {
-            resolve(res.data.value);
+            if (res.data.value.code === 200) {
+                resolve(res.data.value);
+            } 
         }).catch((err) => reject(err));
     });
 };
