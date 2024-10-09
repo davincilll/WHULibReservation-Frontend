@@ -6,6 +6,11 @@ export default defineNuxtConfig({
     build: {
         transpile: ['vuetify'],
     },
+    runtimeConfig: {
+        public: {
+            baseURL:"http://localhost:8000/api/v1"
+        }
+    },
     modules: [
         (_options, nuxt) => {
             nuxt.hooks.hook('vite:extendConfig', (config) => {
@@ -20,6 +25,9 @@ export default defineNuxtConfig({
                 transformAssetUrls,
             },
         },
-    }
+    },
+    typescript: {
+        typeCheck: true
+      }
 })
 
