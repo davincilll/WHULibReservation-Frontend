@@ -3,11 +3,12 @@ export const apiCore = (url, options = {}) => {
     const nuxtApp = useNuxtApp();
     return useFetch(url, {
         baseURL: config.public.baseURL,
+        ...options,
         onRequest({ options }) {
             let token = userStore().getToken();
             options.headers = {
-                Authorization: `Bearer ${token}`,
                 ...options.headers,  
+                Authorization: `Bearer ${token}`,
             };
         },
         onResponse({response}){

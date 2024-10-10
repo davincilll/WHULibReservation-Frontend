@@ -8,9 +8,18 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         public: {
-            baseURL:"http://localhost:8000/api/v1"
+            baseURL:"http://myhk.fun:8999/api/v1"
         }
     },
+    nitro: {
+        devProxy: {
+          "/siteweb": {
+            target: "http://myhk.fun:8999/api/v1", // 这里是接口地址
+            changeOrigin: true,
+            prependPath: true,
+          }
+        }
+      },
     modules: [
         (_options, nuxt) => {
             nuxt.hooks.hook('vite:extendConfig', (config) => {
@@ -18,7 +27,8 @@ export default defineNuxtConfig({
             })
         },
         '@pinia/nuxt',
-        '@pinia-plugin-persistedstate/nuxt'
+        '@pinia-plugin-persistedstate/nuxt',
+        '@nuxt/eslint'
    
     ],
     vite: {

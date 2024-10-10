@@ -33,6 +33,7 @@
     position: fixed;
     bottom: 0;
     width: 100%;
+    height: 50px;
     display: flex;
     align-items: center;
     justify-content: space-between; /* 均匀分布 */
