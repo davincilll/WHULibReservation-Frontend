@@ -2,104 +2,98 @@
   <div>
     <v-container>
       <h3 >历史预约界面</h3>
+     <v-row>
+       <v-col
+         v-for="(item, index) in paginatedData"
+         :key="index"
+         cols="12"
+         sm="6"
+         md="4">
+         <v-card class="mx-auto" :class="['max-width-xs', 'max-width-sm', 'max-width-md']">
+           <v-card-title class="card-header">
+             <span class="seat-info">{{ item.SeatTitle || '未指定座位' }}</span>
+             <span :class="['status', getStatusClass(item.HistoryType)]">{{ item.HistoryType }}</span>
+           </v-card-title>
 
-      <!-- 卡片列表布局 -->
-      <v-row>
-        <v-col
-          v-for="(item, index) in paginatedData"
-          :key="index"
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <v-card class="mx-auto" :class="['max-width-xs', 'max-width-sm', 'max-width-md']">
-            <v-card-title class="card-header">
-              <span class="seat-info">{{ item.seat || '未指定座位' }}</span>
-              <span :class="['status', getStatusClass(item.status)]">{{ item.status }}</span>
-            </v-card-title>
-
-            <v-card-text class="card-body">
-              <span class="time-range">{{ item.time_range || '时间未定' }}</span>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-
-      <!-- 分页组件 -->
-      <v-row justify="center">
-        <v-col cols="12" sm="8" md="6">
-          <v-pagination
-            v-model:="currentPage "
-            :length="totalPages"
-            class="my-4 custom-pagination"
-            align-self="center"
-          ></v-pagination>
-        </v-col>
-      </v-row>
+           <v-card-text class="card-body">
+             <span class="time-range">{{ item.Period || '时间未定' }}</span>
+           </v-card-text>
+         </v-card>
+       </v-col>
+     </v-row>
+     <v-row justify="center">
+       <v-col cols="12" sm="8" md="6">
+         <v-pagination
+           v-model:="currentPage "
+           v-if="data.length > 0"
+           :length="totalPages"
+           class="my-4 custom-pagination"
+           align-self="center"
+         ></v-pagination>
+       </v-col>
+     </v-row>
     </v-container>
   </div>
 </template>
 
-<script setup>
-import { ref, computed } from 'vue'
+<script>
+import { ref,toRaw } from 'vue'
+export default {
+  setup() {
+    const data = ref([])
+    const itemsPerPage = 4 // 每页显示条目数
+    const currentPage = ref(1) // 当前页码
+    
+    const handleLogin =  () => {
+     GetApi('/history', {}).then(res => {
+      data.value = toRaw(res.data)  || [];
+    });
+    };
+    onMounted(() => {
+      handleLogin()
+    })
 
-// 模拟从后端获取的数据
-const rawData = ref([
-  {
-    seat: "信息分馆3层中区自主学习区138号",
-    status: "使用中",
-    time_range: "今天 14:37 -- 17:30"
-  },
-  {
-    seat: "信息分馆3层中区自主学习区137号",
-    status: "已完成",
-    time_range: "昨天 15:48 -- 17:30"
-  },
-  {
-    seat: "信息分馆3层中区自主学习区137号",
-    status: "已完成",
-    time_range: "昨天 09:46 -- 13:30"
-  },
-  {
-    seat: "信息分馆3层中区自主学习区137号",
-    status: "已结束使用",
-    time_range: "2024-09-21 10:50 -- 22:00"
-  },
-  {
-    seat: "",
-    status: "未知状态",
-    time_range: ""
-  }
-])
 
-// 分页逻辑
-const itemsPerPage = 4 // 每页显示条目数
-const currentPage = ref(1) // 当前页码
-
-// 计算总页数
-const totalPages = computed(() => Math.ceil(rawData.value.length / itemsPerPage))
+//计算页总数
+    const totalPages = computed(
+      () => Math.ceil(data.value.length / itemsPerPage)
+ 
+    )
 
 // 获取当前页的数据
-const paginatedData = computed(() => {
-  const start = (currentPage.value - 1) * itemsPerPage
-  return rawData.value.slice(start, start + itemsPerPage)
-})
+    const paginatedData = computed(() => {
+      const start = (currentPage.value - 1) * itemsPerPage
+      return data.value.slice(start, start + itemsPerPage)
+    })
 
-// 根据状态返回不同的颜色类
+//根据状态返回不同的颜色类
 const getStatusClass = (status) => {
   switch (status) {
-    case "使用中":
-      return "status-active"
     case "已完成":
-      return "status-complete"
+      return "status-complete";
+    case "早退":
+      return "status-leave-early";
+    case "失约":
+      return "status-no-show";
+    case "已取消":
+      return "status-cancelled";
     case "已结束使用":
-      return "status-ended"
-    case "未知状态":
-      return "status-unknown"
+      return "status-ended";
     default:
-      return ""
+      return "status-unknown"; // 如果状态不匹配，返回未知状态的类
+  }
+};
+    return {
+      data,
+      handleLogin,
+      currentPage,
+      totalPages,
+      paginatedData,
+      getStatusClass,
+    }
   }
 }
+
 </script>
 
 <style scoped>
@@ -181,13 +175,24 @@ const getStatusClass = (status) => {
 }
 
 /* 不同状态的颜色 */
-.status-active {
-  background-color: #4caf50; /* 使用中: 绿色 */
+/* 不同状态颜色样式 */
+.status-complete {
+  background-color: #4caf50; /* 已完成: 绿色 */
   color: white;
 }
 
-.status-complete {
-  background-color: #2196f3; /* 已完成: 蓝色 */
+.status-leave-early {
+  background-color: #ffeb3b; /* 早退: 黄色 */
+  color: black;
+}
+
+.status-no-show {
+  background-color: #f44336; /* 失约: 红色 */
+  color: white;
+}
+
+.status-cancelled {
+  background-color: #9e9e9e; /* 已取消: 灰色 */
   color: white;
 }
 
@@ -197,7 +202,7 @@ const getStatusClass = (status) => {
 }
 
 .status-unknown {
-  background-color: #9e9e9e; /* 未知状态: 灰色 */
+  background-color: #607d8b; /* 未知状态: 深灰蓝 */
   color: white;
 }
 .custom-pagination .v-pagination {
