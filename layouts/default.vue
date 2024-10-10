@@ -2,7 +2,7 @@
     <div>
       <NuxtPage />
       <footer>
-        <div class="footer-item" @click="navigateTo('')">
+        <div class="footer-item" @click="navigateTo('home')">
           <v-icon class="footer-icon">mdi-home</v-icon>
           <span class="button-text">首页</span>
         </div>
@@ -19,7 +19,7 @@
       </footer>
     </div>
   </template>
-  
+
   <script setup>
   import { useRouter } from 'vue-router'
   const router = useRouter()
@@ -27,7 +27,7 @@
     router.push(`/${page}`)
   }
   </script>
-  
+
   <style scoped>
   footer {
     position: fixed;
@@ -41,7 +41,7 @@
     padding: 10px 20px; /* 增加左右内边距 */
     box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2); /* 更柔和的阴影效果 */
   }
-  
+
   .footer-item {
     display: flex;
     flex-direction: column;
@@ -49,18 +49,18 @@
     flex: 1; /* 使每个项目占据相等的空间 */
     cursor: pointer;
   }
-  
+
   .footer-icon {
     font-size: 24px; /* 图标大小 */
     color: rgba(63, 81, 181, 0.8); /* 半透明图标颜色 */
   }
-  
+
   .button-text {
     font-size: 12px; /* 字体大小 */
     margin-top: 4px; /* 图标与文字之间的间距 */
     opacity: 0.8; /* 文字透明度 */
   }
-  
+
   .separator {
     width: 1px; /* 分隔符宽度 */
     height: 40px; /* 分隔符高度 */

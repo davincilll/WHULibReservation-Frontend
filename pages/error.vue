@@ -1,5 +1,5 @@
 <template>
-  
+
 </template>
 
 <script>
@@ -8,7 +8,7 @@ onMounted(() => {
   if(route.query.code){
     useNuxtApp().$toast.error(route.query.msg)
     userStore().setToken("")
-    navigateTo("/login")
+    navigateTo("/")
   }
 })
 </script>
