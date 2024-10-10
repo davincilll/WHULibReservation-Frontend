@@ -1,7 +1,10 @@
-export const apiCore = (url, options = {}) => {
+export const apiCore = async(url, options = {}) => {
+    //fix 第一次刷新会访问不到数据
+    await nextTick();
     const config = useRuntimeConfig();
     const nuxtApp = useNuxtApp();
     return useFetch(url, {
+        
         baseURL: config.public.baseURL,
         ...options,
         onRequest({ options }) {
@@ -60,9 +63,11 @@ export const GetApi = (url, params = {}, options = {}) => {
             ...options  // 允许外部传递其他配置
         }).then((res) => {
             console.log(res);
-            if (res.data._value.code === 200) {
-                resolve(res.data._rawValue.data);
-            }
+            if (res && res.data._value) {
+                if(res.data._value.code === 200){
+                    resolve(res.data._rawValue.data);
+                }
+              }
         }).catch((err) => reject(err));
     });
 };
