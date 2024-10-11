@@ -1,41 +1,65 @@
 <template>
   <div>
-    <v-container>
-      <h3 class="section-title">历史预约界面</h3>
-      <v-row>
-        <v-col
-          v-for="(item, index) in paginatedData"
-          :key="index"
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <!-- 卡片设计 -->
-          <v-card class="mx-auto card-container">
-  <v-card-title class="card-header">
-    <span class="seat-info">{{ item.SeatTitle || '未指定座位' }}</span>
-  </v-card-title>
+    <v-container class="pa-0">
+      <div class="header-container">
+        <h3 class="section-title">历史预约</h3>
+        
+      </div>
+      
+      <div class="d-flex justify-center align-center total-data-container">
+  <div class="total-data-count">
+    共 {{ dataCount }} 条预约记录
+  </div>
+  <v-select
+    v-model="selectedHistoryType"
+    :items="historyTypes"
+    label="筛选状态"
+    class="custom-select"
+    clearable
+    outlined
+    dense
+  >
+    <template v-slot:prepend-inner>
+      <v-icon>mdi-filter-variant</v-icon>
+    </template>
+  </v-select>
+</div>
 
-  <v-card-text class="card-body d-flex justify-space-between align-center">
-    <div class="d-flex align-center">
-      <span class="time-range">{{ item.Period || '时间未定' }}</span>
-    </div>
-    <v-chip :color="getStatusColor(item.HistoryType)" small label>
-      {{ item.HistoryType }}
-    </v-chip>
-  </v-card-text>
-</v-card>
+          <v-row>
+      <v-col
+        v-for="(item, index) in paginatedFilteredData"
+        :key="index"
+        cols="12"
+        sm="6"
+        md="4"
+      >
+        <!-- 卡片设计 -->
+        <v-card class="mx-auto card-container">
+          <v-card-title class="card-header">
+            <span class="seat-info">{{ item.SeatTitle || '未指定座位' }}</span>
+          </v-card-title>
 
-        </v-col>
-      </v-row>
+          <v-card-text class="card-body d-flex justify-space-between align-center">
+            <div class="d-flex align-center">
+              <span class="time-range">{{ item.Period || '时间未定' }}</span>
+            </div>
+            <v-chip :color="getStatusColor(item.HistoryType)" small label>
+              {{ item.HistoryType }}
+            </v-chip>
+          </v-card-text>
+        </v-card>
+      </v-col>
+    </v-row>
+
+
       <v-row justify="center">
         <v-col cols="12" sm="8" md="6">
           <!-- 分页按钮 -->
           <v-pagination
             v-model="currentPage"
-            v-if="data.length > 0"
+            v-if="paginatedFilteredData.length > 0"
             :length="totalPages"
-            class="my-4 custom-pagination"
+            class="mb-12 custom-pagination"
             align-self="center"
           ></v-pagination>
         </v-col>
@@ -44,35 +68,53 @@
   </div>
 </template>
 
+
 <script>
 import { ref, toRaw, computed, onMounted } from 'vue'
 
 export default {
   setup() {
-    const data = ref([])
+    const data = ref([]) // 全部数据
     const itemsPerPage = 4 // 每页显示条目数
     const currentPage = ref(1) // 当前页码
+    const selectedHistoryType = ref(null) // 筛选的状态
+
+    const historyTypes = ["已完成", "早退", "失约", "已取消", "已结束使用","使用中"] // 所有状态
 
     const handleLogin = () => {
       GetApi('/history', {}).then((res) => {
         data.value = toRaw(res.data) || []
       })
     }
+    
     onMounted(() => {
       handleLogin()
     })
 
-    // 计算页总数
-    const totalPages = computed(() => Math.ceil(data.value.length / itemsPerPage))
+    // 计算数据总数
+    const dataCount = computed(() => data.value.length)
 
-    // 获取当前页的数据
-    const paginatedData = computed(() => {
+    // 根据筛选条件获取符合的数据
+    const filteredData = computed(() => {
+      // 如果没有选定筛选条件，则返回所有数据
+      if (!selectedHistoryType.value) {
+        return data.value
+      }
+      // 根据筛选条件筛选
+      return data.value.filter(item => item.HistoryType === selectedHistoryType.value)
+    })
+
+    // 计算页总数
+    const totalPages = computed(() => Math.ceil(filteredData.value.length / itemsPerPage))
+
+    // 获取当前页的数据 (通过分页)
+    const paginatedFilteredData = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage
-      return data.value.slice(start, start + itemsPerPage)
+      const end = start + itemsPerPage
+      return filteredData.value.slice(start, end)
     })
 
     // 根据状态返回不同的颜色类
-
     const getStatusColor = (status) => {
       const statusColors = {
         "已完成": "success",
@@ -80,22 +122,50 @@ export default {
         "失约": "error",
         "已取消": "grey",
         "已结束使用": "orange",
-      };
-      return statusColors[status] || "blue-grey";}
+      }
+      return statusColors[status] || "blue-grey"
+    }
 
     return {
       data,
-      handleLogin,
+      dataCount,
       currentPage,
       totalPages,
-      paginatedData,
+      paginatedFilteredData,
+      selectedHistoryType,
+      historyTypes,
       getStatusColor,
     }
   },
 }
+
 </script>
 
 <style scoped>
+/* 总数据条数样式 */
+.total-data-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 16px;
+  margin-bottom: 16px;
+}
+
+/* 总数据条数样式 */
+.total-data-count {
+  font-size: 1rem;
+  color: #333;
+  margin-right: 16px; /* 右边留出空间给筛选框 */
+}
+
+/* 筛选框样式 */
+.custom-select {
+  max-width: 180px; /* 设置最大宽度 */
+  min-width: 150px; /* 设置最小宽度 */
+  width: 100%; /* 让宽度适应容器 */
+  margin: 0; /* 移除默认的 margin */
+}
 /* 标题样式 */
 .section-title {
   font-size: 1.5rem;

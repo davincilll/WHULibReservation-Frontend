@@ -23,6 +23,7 @@ export default defineNuxtConfig({
         '@nuxt/eslint'
 
     ],
+    css: ['~/assets/css/main.css'],
     vite: {
         vue: {
             template: {
