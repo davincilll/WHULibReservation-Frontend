@@ -1,70 +1,83 @@
 <template>
   <div>
-    <v-container class="pa-0">
-      <div class="header-container">
-        <h3 class="section-title">历史预约</h3>
-        
-      </div>
-      
-      <div class="d-flex justify-center align-center total-data-container">
-  <div class="total-data-count">
-    共 {{ dataCount }} 条预约记录
-  </div>
-  <v-select
-    v-model="selectedHistoryType"
-    :items="historyTypes"
-    label="筛选状态"
-    class="custom-select"
-    clearable
-    outlined
-    dense
-  >
-    <template v-slot:prepend-inner>
-      <v-icon>mdi-filter-variant</v-icon>
-    </template>
-  </v-select>
-</div>
+    <v-container class="pa-0 bg-gradient-to-br from-blue-lighten-5 via-indigo-lighten-5 to-purple-lighten-5" fluid>
+    <v-card class="mx-auto" max-width="600" elevation="0" color="transparent">
 
-          <v-row>
-      <v-col
-        v-for="(item, index) in paginatedFilteredData"
-        :key="index"
-        cols="12"
-        sm="6"
-        md="4"
-      >
-        <!-- 卡片设计 -->
-        <v-card class="mx-auto card-container">
-          <v-card-title class="card-header">
-            <span class="seat-info">{{ item.SeatTitle || '未指定座位' }}</span>
-          </v-card-title>
+      <v-card-text class="pa-4">
+        <v-sheet color="blue-lighten-4" class="rounded-lg pa-4 d-flex justify-space-between align-center">
+          <div class="text-indigo-darken-3 font-weight-medium">
+            共 {{ dataCount }} 条预约记录
+          </div>
+          <v-select
+            v-model="selectedHistoryType"
+            :items="historyTypes"
+            label="筛选"
+            class="custom-select"
+            hide-details
+            density="compact"
+            variant="outlined"
+            style="max-width: 150px;"
+          >
+            <template v-slot:prepend-inner>
+              <v-icon icon="mdi-filter-variant" color="indigo-darken-1"></v-icon>
+            </template>
+          </v-select>
+        </v-sheet>
+      </v-card-text>
 
-          <v-card-text class="card-body d-flex justify-space-between align-center">
-            <div class="d-flex align-center">
-              <span class="time-range">{{ item.Period || '时间未定' }}</span>
-            </div>
-            <v-chip :color="getStatusColor(item.HistoryType)" small label>
-              {{ item.HistoryType }}
-            </v-chip>
-          </v-card-text>
-        </v-card>
+      <v-card-text class="pa-4">
+        <v-row>
+          <v-col
+            v-for="(item, index) in paginatedFilteredData"
+            :key="index"
+            cols="12"
+          >
+            <v-card class="rounded-xl" elevation="1">
+              <v-card-item>
+    <v-row no-gutters class="d-flex align-center">
+      <!-- 座位标题和时间 -->
+      <v-col class="flex-grow-1">
+        <v-card-title class="font-weight-bold pb-1 d-flex align-center">
+          <v-icon style="font-size: 24px;" icon="mdi-map-marker" color="indigo-lighten-1"></v-icon>
+          <span class="text-truncate seat-title">{{ item.SeatTitle || '未指定座位' }}</span>
+        </v-card-title>
+
+        <!-- 时间和状态在同一行 -->
+        <div class="d-flex justify-space-between align-center">
+          <v-card-subtitle class="d-flex align-center">
+            <v-icon icon="mdi-calendar" color="indigo-lighten-1" class="mr-2"></v-icon>
+            <span class="time-range">{{ item.Period || '时间未定' }}</span>
+          </v-card-subtitle>
+
+          <!-- 状态芯片 -->
+          <v-chip
+            :color="getStatusColor(item.HistoryType)"
+            text-color="white"
+            class="font-weight-medium status-chip"
+          >
+            {{ item.HistoryType }}
+          </v-chip>
+        </div>
       </v-col>
     </v-row>
+  </v-card-item>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-card-text>
 
-
-      <v-row justify="center">
-        <v-col cols="12" sm="8" md="6">
-          <!-- 分页按钮 -->
-          <v-pagination
-            v-model="currentPage"
-            v-if="paginatedFilteredData.length > 0"
-            :length="totalPages"
-            class="mb-12 custom-pagination"
-            align-self="center"
-          ></v-pagination>
-        </v-col>
-      </v-row>
-    </v-container>
+      <!-- Pagination -->
+      <v-card-actions class="justify-center ">
+        <v-pagination
+          v-if="paginatedFilteredData.length > 0"
+          v-model="currentPage"
+          :length="totalPages"
+          rounded="circle"
+          class="mb-10"
+        ></v-pagination>
+      </v-card-actions>
+    </v-card>
+  </v-container>
   </div>
 </template>
 
@@ -142,161 +155,32 @@ export default {
 </script>
 
 <style scoped>
-/* 总数据条数样式 */
-.total-data-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
-  padding: 0 16px;
-  margin-bottom: 16px;
+.v-card {
+  transition: transform 0.3s ease;
+}
+.v-card:hover {
+  transform: translateY(-4px);
+}
+.seat-title {
+  font-size: 16px;
 }
 
-/* 总数据条数样式 */
-.total-data-count {
-  font-size: 1rem;
-  color: #333;
-  margin-right: 16px; /* 右边留出空间给筛选框 */
+/* 时间部分字体调整 */
+
+/* 状态芯片的样式 */
+.status-chip {
+  font-size: 14px;
+  margin-left: 8px;
 }
 
-/* 筛选框样式 */
-.custom-select {
-  max-width: 180px; /* 设置最大宽度 */
-  min-width: 150px; /* 设置最小宽度 */
-  width: 100%; /* 让宽度适应容器 */
-  margin: 0; /* 移除默认的 margin */
-}
-/* 标题样式 */
-.section-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 24px;
-  color: #333;
-}
-
-/* 卡片容器 */
-.card-container {
-  max-width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  padding: 16px;
-}
-
-.card-container:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-/* 卡片头部布局 */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  padding-bottom: 8px;
-}
-
-/* 座位信息左上显示 */
-.seat-info {
-  display: inline-block;
-  font-size: 0.9rem;
-  color: #666;
-  flex: 1;
-}
-
-/* 状态信息在右边显示 */
-.status {
-  display: inline-block;
-  font-size: 0.8rem;
-  padding: 4px 12px;
-  border-radius: 16px;
-  text-align: center;
-  font-weight: 500;
-  transition: background-color 0.3s ease;
-}
-
-/* 时间范围在左下方 */
-.card-body {
-  justify-content: flex-start;
-  font-size: 0.85rem;
-  color: #999;
-}
-
-/* 状态样式 */
-.status-complete {
-  background-color: #4caf50;
-  color: white;
-}
-
-.status-leave-early {
-  background-color: #ffeb3b;
-  color: black;
-}
-
-.status-no-show {
-  background-color: #f44336;
-  color: white;
-}
-
-.status-cancelled {
-  background-color: #9e9e9e;
-  color: white;
-}
-
-.status-ended {
-  background-color: #ff9800;
-  color: white;
-}
-
-.status-unknown {
-  background-color: #607d8b;
-  color: white;
-}
-
-/* 分页样式 */
-.custom-pagination {
-  display: flex;
-  justify-content: center;
-}
-
-.custom-pagination .v-pagination__item {
-  font-size: 1rem;
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
-  border-radius: 50%;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.custom-pagination .v-pagination__item:hover {
-  background-color: #3f51b5;
-  color: white;
-  transform: translateY(-2px);
-}
-
-.custom-pagination .v-pagination__item--active {
-  background-color: #3f51b5;
-  color: white;
-}
-
-/* 响应式布局 */
-@media (min-width: 600px) {
-  .card-container {
-    max-width: 90%;
+/* 确保卡片内容在小屏幕上也能正常显示 */
+@media (max-width: 600px) {
+  .time-range {
+    font-size: 12px;
   }
-}
 
-@media (min-width: 960px) {
-  .card-container {
-    max-width: 80%;
-  }
-}
-
-@media (min-width: 1264px) {
-  .card-container {
-    max-width: 70%;
+  .status-chip {
+    font-size: 12px;
   }
 }
 </style>

@@ -1,82 +1,101 @@
 <template>
   <div>
-    <!-- 主内容 -->
-    <v-container class="pa-0">
-      <div class="header-container">
-        <h3 class="section-title">预约界面</h3>
-      </div>
-
+    <v-container class="pa-0 bg-gradient-to-br from-blue-lighten-5 via-teal-lighten-5 to-green-lighten-5" fluid>
+    <v-card class="mx-auto" max-width="1200" elevation="0" color="transparent">
+      <!-- 顶部标题 -->
       <!-- 筛选建筑和楼层 -->
-      <v-row class="filter-container mb-4" align="center">
-        <v-col cols="6" class="d-flex align-center">
+      <v-card-text>
+      <v-row class="mt-1 d-flex align-center">
+        <!-- 建筑筛选 -->
+    
           <v-select
             v-model="parmars.building"
             :items="buildings"
             item-title="name"
             item-value="value"
             label="选择建筑"
-            outlined
-            class="custom-select"
-            dense
-            @update:modelValue="handleBuildingChange"
+            variant="outlined"
+            density="comfortable"
+            class="rounded-lg"
+            @update:model-value="handleBuildingChange"
           ></v-select>
-        </v-col>
-        <v-col cols="6" class="d-flex align-center">
+      
+
+        <!-- 楼层筛选 -->
+        
           <v-select
             v-model="parmars.floor"
             :items="floors"
             item-title="label"
             item-value="value"
             label="选择楼层"
-            outlined
-            class="custom-select"
-            dense
+            variant="outlined"
+            density="comfortable"
+            class="rounded-lg"
             :disabled="!parmars.building"
-            @update:modelValue="handleFloorChange"
+            @update:model-value="handleFloorChange"
           ></v-select>
-        </v-col>
       </v-row>
+    </v-card-text>
 
       <!-- 卡片列表 -->
-      <v-row>
-        <v-col
-          v-for="(item, index) in paginatedFilteredData"
-          :key="index"
-          cols="12"
-          sm="6"
-          md="4"
-        >
-          <v-card class="mx-auto card-container">
-            <v-card-title class="card-header">
-              <span class="seat-info">{{ item.Name || '未指定名称' }}</span>
-            </v-card-title>
-            <v-card-text class="card-body d-flex justify-space-between align-center">
-            <div class="d-flex align-center">
-              <span class="time-range">{{ today }}</span>
-            </div>
-          </v-card-text>
-            <v-card-actions>
-              <v-btn color="primary" @click="handleSeatQuery(item.Id)">
-                查找座位
-              </v-btn>
-            </v-card-actions>
-          </v-card>
-        </v-col>
-      </v-row>
+      <v-card-text>
+        <v-row>
+          <v-col
+            v-for="(item, index) in paginatedFilteredData"
+            :key="index"
+            cols="12"
+            sm="6"
+            md="4"
+          >
+            <v-card class="rounded-xl" elevation="2">
+              <v-card-item>
+              <v-row class="d-flex align-center">
+                <!-- 座位信息和时间 -->
+                <v-col class="d-flex align-center flex-grow-1">
+                  <!-- 座位名称 -->
+                  <v-card-title class="text-h6 font-weight-bold pb-2 d-flex align-center">
+                    <v-icon icon="mdi-seat" color="teal-darken-1" class="mr-2"></v-icon>
+                    <span class="text-truncate room-title">{{ item.Name || '未指定名称' }}</span>
+                  </v-card-title>
+                </v-col>
+                <div class="d-flex justify-space-between align-center">
+                  <v-card-subtitle class="d-flex align-center">
+                    <v-icon icon="mdi-calendar" color="teal-lighten-1" class="ml-3"></v-icon>
+                    {{ today }}
+                  </v-card-subtitle>
+                  <v-spacer></v-spacer>
+                <!-- 查找座位按钮 -->
+                <v-col cols="auto">
+                  <v-btn 
+                    color="teal-darken-1"
+                    variant="elevated"
+                    @click="handleSeatQuery(item.Id)"
+                    class="rounded-lg"
+                  >
+                    查找座位
+                  </v-btn>
+                </v-col>
+                </div>
+              </v-row>
+    </v-card-item>
+            </v-card>
+          </v-col>
+        </v-row>
+      </v-card-text>
 
       <!-- 分页 -->
-      <v-row justify="center">
-        <v-col cols="12" sm="8" md="6">
-          <v-pagination
-            v-model="currentPage"
-            v-if="paginatedFilteredData.length > 0"
-            :length="totalPages"
-            class="mb-12 custom-pagination"
-            align-self="center"
-          ></v-pagination>
-        </v-col>
-      </v-row>
-    </v-container>
+      <v-card-actions class="justify-center mt-6">
+        <v-pagination
+          v-if="paginatedFilteredData.length > 0"
+          v-model="currentPage"
+          :length="totalPages"
+          rounded="circle"
+          color="teal-darken-1"
+        ></v-pagination>
+      </v-card-actions>
+    </v-card>
+  </v-container>
   </div>
 </template>
 
@@ -173,6 +192,7 @@ export default {
       if (floors.value.length > 0) {
         parmars.value.floor = floors.value[0].value;
       }
+      handleFloorChange()
     };
       const handleFloorChange = () => {
       GetApi('/roomQuery', parmars).then((res) => {
@@ -182,8 +202,7 @@ export default {
   onMounted(() => {
       // 默认选择第一个建筑
         parmars.value.building = buildings.value[0].value;
-        handleBuildingChange();
-        handleFloorChange()
+        handleBuildingChange()
     });
     return {
       data,
@@ -201,104 +220,18 @@ export default {
   },
 };
 </script>
-
 <style scoped>
-/* 筛选栏样式 */
-.filter-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 16px;
-  background-color: #f4f4f4;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  margin-bottom: 24px;
-}
-
-.custom-select {
-  max-width: 180px;
-  min-width: 150px;
-  width: 100%;
-}
-
-/* 标题样式 */
-.section-title {
-  font-size: 1.5rem;
-  font-weight: bold;
-  text-align: center;
-  margin-bottom: 24px;
-  color: #333;
-}
-
-/* 卡片容器 */
-.card-container {
-  max-width: 100%;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+.v-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  padding: 16px;
 }
-
-.card-container:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+.v-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 25px 0 rgba(0, 0, 0, 0.1);
 }
-
-/* 卡片头部布局 */
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: bold;
-  padding-bottom: 8px;
+.room-title {
+  font-size: 16px;
 }
-
 .v-btn {
-  margin-left: auto;
-}
-
-/* 分页样式 */
-.custom-pagination {
-  display: flex;
-  justify-content: center;
-}
-
-.custom-pagination .v-pagination__item {
-  font-size: 1rem;
-  width: 36px;
-  height: 36px;
-  line-height: 36px;
-  border-radius: 50%;
-  transition: background-color 0.3s ease, transform 0.3s ease;
-}
-
-.custom-pagination .v-pagination__item:hover {
-  background-color: #3f51b5;
-  color: white;
-  transform: translateY(-2px);
-}
-
-.custom-pagination .v-pagination__item--active {
-  background-color: #3f51b5;
-  color: white;
-}
-
-/* 响应式布局 */
-@media (min-width: 600px) {
-  .card-container {
-    max-width: 90%;
-  }
-}
-
-@media (min-width: 960px) {
-  .card-container {
-    max-width: 80%;
-  }
-}
-
-@media (min-width: 1264px) {
-  .card-container {
-    max-width: 70%;
-  }
+  margin-left: 95%;
 }
 </style>
