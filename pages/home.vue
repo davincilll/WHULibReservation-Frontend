@@ -95,39 +95,31 @@
         ></v-pagination>
       </v-card-actions>
     </v-card>
-    <v-dialog v-model="seatDialog" max-width="800">
-  <v-card>
-    <v-card-title class="text-h5">座位布局</v-card-title>
-    <v-card-text>
-      <div
-        class="seat-layout"
-        @touchstart="handleTouchStart"
-        @touchmove="handleTouchMove"
-        @touchend="handleTouchEnd"
-        :style="{ transform: 'scale(' + scale + ')' }"
-      >
-        <!-- 根据布局显示座位 -->
-        <div
+          <v-dialog v-model="seatDialog" max-width="800">
+          <v-card>
+          <v-card-title class="text-h5">座位布局</v-card-title>
+          <v-card-text>
+          <div class="seat-layout">
+          <!-- 根据布局显示座位 -->
+          <div
           v-for="seatLayout in layout"
           :key="seatLayout.id"
           class="seat"
           :style="{ top: seatLayout.y + 'px', left: seatLayout.x + 'px' }"
           @click="handleSeatClick(seatLayout)"
-        >
+          >
           <!-- 获取对应的座位状态和编号 -->
-          <v-img
-            :src="getSeatIcon(getSeatStatus(seatLayout.id))"
-            alt="seat"
-            class="seat-icon"
-          ></v-img>
-        </div>
-      </div>
-    </v-card-text>
-    <v-card-actions>
+          <v-img :src="getSeatIcon(getSeatStatus(seatLayout.id))" alt="seat" class="seat-icon" ></v-img>
+          <!-- 渲染座位编号 -->
+          <!-- <div class="seat-number">{{ getSeatNumber(seatLayout.id) }}</div> -->
+          </div>
+          </div>
+          </v-card-text>
+      <v-card-actions>
       <v-btn text @click="seatDialog = false">关闭</v-btn>
-    </v-card-actions>
-  </v-card>
-</v-dialog>
+      </v-card-actions>
+      </v-card>
+      </v-dialog>
   </v-container>
   </div>
 </template>
@@ -163,38 +155,6 @@ export default {
       { name: '主馆考试季24小时', value: '13' },
     ]);
     const floors = ref([]);
-    const scale = ref(1); // 初始缩放比例
-const startDistance = ref(0); // 用于计算双指缩放的初始距离
-
-const handleTouchStart = (e) => {
-  // 检查是否有两个手指接触屏幕
-  if (e.touches.length === 2) {
-    const [touch1, touch2] = e.touches;
-    startDistance.value = getDistance(touch1, touch2);
-  }
-};
-
-const handleTouchMove = (e) => {
-  // 检查是否有两个手指移动
-  if (e.touches.length === 2) {
-    const [touch1, touch2] = e.touches;
-    const currentDistance = getDistance(touch1, touch2);
-    const scaleChange = currentDistance / startDistance.value;
-    scale.value = Math.min(Math.max(scale.value * scaleChange, 0.5), 3); // 设定最大缩放和最小缩放
-    startDistance.value = currentDistance; // 更新起始距离
-  }
-};
-
-const handleTouchEnd = () => {
-  // 重置缩放开始距离
-  startDistance.value = 0;
-};
-
-const getDistance = (touch1, touch2) => {
-  const deltaX = touch2.clientX - touch1.clientX;
-  const deltaY = touch2.clientY - touch1.clientY;
-  return Math.sqrt(deltaX * deltaX + deltaY * deltaY); // 计算两点之间的距离
-};
     // 模拟点击按钮查找座位
     const handleSeatQuery = (id) => {
       parmars1.value.room = id;
@@ -207,25 +167,29 @@ const getDistance = (touch1, touch2) => {
     const getSeatIcon = (status) => {
       switch (status) {
         case 'idle_power':
-          return '../assetsidle.png';
+          return '/idle_power.svg';
         case 'idle_both':
-          return '../assetsidle.png';
+          return '/idle_power.svg';
         case 'inuse_power':
-          return '../assetsusre.png';
+          return '/inuse_power.svg';
         case 'inuse_both':
-          return '../assets/usre.png';
+          return '/inuse_power.svg';
         case 'leave':
-          return '../assets/leave.png';
+          return '/leave.svg';
         case 'agreement':
-          return '../assets/agreement.png';
+          return '/agreement.svg';
         case 'inuse_computer':
-          return '../assets/usre.png';
+          return '/inuse_computer.svg';
         case 'idle_computer':
-          return '../assets/idle.png';
+          return '/idle_computer.svg';
         case 'noUsre':
-          return '../assets/noUsre.png';
+          return '/noUsre.svg';
+        case 'idle':
+          return '/idle.svg';
+        case 'usre':
+          return '/usre.svg';
         default:
-          return '/usre.png'; // 默认图标
+          return '/usre.svg'; // 默认图标
       }
     };
     const getSeatStatus = (id) => {
@@ -353,22 +317,10 @@ const getDistance = (touch1, touch2) => {
       getSeatIcon,
       getSeatStatus,
       layout,
-      handleTouchStart,
-      handleTouchMove,
-      handleTouchEnd,
-      startDistance,
       seats,
       selectedSeat,
-      seatDialog,
-      handleSeatClick,
-      getSeatIcon,
-      getSeatStatus,
-      handleSeatQuery,
-      handleFloorChange,
-      handleBuildingChange,
-      handleTouchStart,
-      handleTouchMove,
-      scale,
+  
+
       
 
     };
