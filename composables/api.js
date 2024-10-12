@@ -6,6 +6,7 @@ export const apiCore = async(url, options = {}) => {
     return useFetch(url, {
         
         baseURL: config.public.baseURL,
+        // key:md5(obj.url+(queryData||bodyData)??(JSON.stringify(queryData||bodyData))),
         ...options,
         onRequest({ options }) {
             let token = userStore().getToken();
@@ -19,6 +20,7 @@ export const apiCore = async(url, options = {}) => {
             if (response.status>=200&&response.status<300){
                 if(response._data.code !==200){
                     if(import.meta.client){
+                        // console.log(response._data.msg);
                         nuxtApp.$toast.error(response._data.msg);
                     }else{
                         nuxtApp.runWithContext(()=>{
@@ -35,6 +37,7 @@ export const apiCore = async(url, options = {}) => {
             }
         },
         onResponseError({response}){
+            if (response.status < 200 || response.status >= 300) {
                     if(import.meta.client){
                         nuxtApp.$toast.error(response._data.msg);
                     }else{
@@ -48,6 +51,7 @@ export const apiCore = async(url, options = {}) => {
                             })
                         })
                     }
+                }
         },
         ...options,
     });
@@ -62,7 +66,7 @@ export const GetApi = (url, params = {}, options = {}) => {
             params,  // 将数据序列化为 JSON
             ...options  // 允许外部传递其他配置
         }).then((res) => {
-            console.log(res);
+            // console.log(res);
             if (res && res.data._value) {
                 if(res.data._value.code === 200){
                     resolve(res.data._rawValue.data);

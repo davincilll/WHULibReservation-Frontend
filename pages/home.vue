@@ -141,7 +141,8 @@ export default {
       const end = start + itemsPerPage;
       return data.value.slice(start, end);
     });
-
+    let isInitialized = false;
+    let isManualFloorChange = false;
     // 根据建筑类型更新楼层
     const handleBuildingChange = () => {
       let floorOptions = [];
@@ -190,19 +191,26 @@ export default {
       }
       floors.value = floorOptions;
       if (floors.value.length > 0) {
+        isManualFloorChange = false;
         parmars.value.floor = floors.value[0].value;
       }
-      handleFloorChange()
+            // 如果是初始化阶段，则允许发起请求
+        if (!isInitialized) {
+          handleFloorChange();
+        }
     };
-      const handleFloorChange = () => {
-      GetApi('/roomQuery', parmars).then((res) => {
-      data.value = toRaw(res.data) || []
-      // console.log('res.data',res.data)
-  })}
+    const handleFloorChange = () => {
+    if (!isInitialized|| isManualFloorChange) {
+        GetApi('/roomQuery', parmars).then((res) => {
+            data.value = toRaw(res.data) || [];
+        });
+    } 
+};
   onMounted(() => {
       // 默认选择第一个建筑
         parmars.value.building = buildings.value[0].value;
         handleBuildingChange()
+        isInitialized = true;
     });
     return {
       data,
