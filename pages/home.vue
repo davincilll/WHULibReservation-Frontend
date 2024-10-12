@@ -95,6 +95,39 @@
         ></v-pagination>
       </v-card-actions>
     </v-card>
+    <v-dialog v-model="seatDialog" max-width="800">
+  <v-card>
+    <v-card-title class="text-h5">座位布局</v-card-title>
+    <v-card-text>
+      <div
+        class="seat-layout"
+        @touchstart="handleTouchStart"
+        @touchmove="handleTouchMove"
+        @touchend="handleTouchEnd"
+        :style="{ transform: 'scale(' + scale + ')' }"
+      >
+        <!-- 根据布局显示座位 -->
+        <div
+          v-for="seatLayout in layout"
+          :key="seatLayout.id"
+          class="seat"
+          :style="{ top: seatLayout.y + 'px', left: seatLayout.x + 'px' }"
+          @click="handleSeatClick(seatLayout)"
+        >
+          <!-- 获取对应的座位状态和编号 -->
+          <v-img
+            :src="getSeatIcon(getSeatStatus(seatLayout.id))"
+            alt="seat"
+            class="seat-icon"
+          ></v-img>
+        </div>
+      </div>
+    </v-card-text>
+    <v-card-actions>
+      <v-btn text @click="seatDialog = false">关闭</v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
   </v-container>
   </div>
 </template>
@@ -108,13 +141,19 @@ export default {
     const today = new Date().toISOString().substring(0, 10)
     const itemsPerPage = 4; // 每页显示条目数
     const currentPage = ref(1); // 当前页码
-
+    const seats = ref([]); // 座位数据
+    const seatDialog = ref(false); // 控制座位弹窗
+    const selectedSeat = ref(null); // 记录当前点击的座位
+    const layout = ref([]); // 存储布局信息 (id, x, y 坐标)
     const parmars = ref({
       building: '',
       floor: '',
       Ondate:today,
     });
-
+    const parmars1 = ref({
+      room: '',
+      Ondate:today,
+    });
     const buildings = ref([
       { name: '信息分馆', value: '1' },
       { name: '工学分馆', value: '2' },
@@ -123,15 +162,82 @@ export default {
       { name: '信息分馆考试季24小时', value: '7' },
       { name: '主馆考试季24小时', value: '13' },
     ]);
-
     const floors = ref([]);
+    const scale = ref(1); // 初始缩放比例
+const startDistance = ref(0); // 用于计算双指缩放的初始距离
 
+const handleTouchStart = (e) => {
+  // 检查是否有两个手指接触屏幕
+  if (e.touches.length === 2) {
+    const [touch1, touch2] = e.touches;
+    startDistance.value = getDistance(touch1, touch2);
+  }
+};
+
+const handleTouchMove = (e) => {
+  // 检查是否有两个手指移动
+  if (e.touches.length === 2) {
+    const [touch1, touch2] = e.touches;
+    const currentDistance = getDistance(touch1, touch2);
+    const scaleChange = currentDistance / startDistance.value;
+    scale.value = Math.min(Math.max(scale.value * scaleChange, 0.5), 3); // 设定最大缩放和最小缩放
+    startDistance.value = currentDistance; // 更新起始距离
+  }
+};
+
+const handleTouchEnd = () => {
+  // 重置缩放开始距离
+  startDistance.value = 0;
+};
+
+const getDistance = (touch1, touch2) => {
+  const deltaX = touch2.clientX - touch1.clientX;
+  const deltaY = touch2.clientY - touch1.clientY;
+  return Math.sqrt(deltaX * deltaX + deltaY * deltaY); // 计算两点之间的距离
+};
     // 模拟点击按钮查找座位
     const handleSeatQuery = (id) => {
-      console.log('查询座位 ID:', id);
-      // 在此处添加查询座位的逻辑
+      parmars1.value.room = id;
+      GetApi('seatQuery', parmars1).then((res) => {
+        seats.value = toRaw(res.data) || [];
+        seatDialog.value = true;
+      });
+      layout.value = layouts[id];
     };
-
+    const getSeatIcon = (status) => {
+      switch (status) {
+        case 'idle_power':
+          return '../assetsidle.png';
+        case 'idle_both':
+          return '../assetsidle.png';
+        case 'inuse_power':
+          return '../assetsusre.png';
+        case 'inuse_both':
+          return '../assets/usre.png';
+        case 'leave':
+          return '../assets/leave.png';
+        case 'agreement':
+          return '../assets/agreement.png';
+        case 'inuse_computer':
+          return '../assets/usre.png';
+        case 'idle_computer':
+          return '../assets/idle.png';
+        case 'noUsre':
+          return '../assets/noUsre.png';
+        default:
+          return '/usre.png'; // 默认图标
+      }
+    };
+    const getSeatStatus = (id) => {
+      // 根据座位ID获取座位状态
+      const seat = seats.value.find((s) => s.Id === id);
+      return seat ? seat.Status : 'unknown'; // 如果找不到座位，返回未知状态
+    };
+        // 处理点击座位事件
+    const handleSeatClick = (seat) => {
+      selectedSeat.value = seat; // 可以在这里处理座位点击事件，比如展示详细信息
+      console.log('Seat clicked:', seat);
+    };
     // 计算总页数
     const totalPages = computed(() => Math.ceil(data.value.length / itemsPerPage));
 
@@ -212,6 +318,23 @@ export default {
         handleBuildingChange()
         isInitialized = true;
     });
+    const layouts = {
+  '15': [
+    { id: '1', x: 50, y: 50 },
+    { id: '3', x: 150, y: 50 },
+    { id: '7', x: 50, y: 150 },
+    { id: '4', x: 250, y: 50 },
+    { id: '6', x: 350, y: 50 },
+    { id: '10', x: 150, y: 150 },
+    { id: '11', x: 250, y: 150 },
+    { id: '5', x: 350, y: 150 },
+    { id: '12', x: 50, y: 250 },
+    { id: '7', x: 150, y: 250 },
+    { id: '8', x: 250, y: 250 },
+  ]
+};
+
+    
     return {
       data,
       today,
@@ -224,6 +347,30 @@ export default {
       handleSeatQuery,
       handleBuildingChange,
       handleFloorChange,
+      seatDialog,
+      handleSeatQuery,
+      handleSeatClick,
+      getSeatIcon,
+      getSeatStatus,
+      layout,
+      handleTouchStart,
+      handleTouchMove,
+      handleTouchEnd,
+      startDistance,
+      seats,
+      selectedSeat,
+      seatDialog,
+      handleSeatClick,
+      getSeatIcon,
+      getSeatStatus,
+      handleSeatQuery,
+      handleFloorChange,
+      handleBuildingChange,
+      handleTouchStart,
+      handleTouchMove,
+      scale,
+      
+
     };
   },
 };
@@ -241,5 +388,24 @@ export default {
 }
 .v-btn {
   margin-left: 95%;
+}
+.seat-layout {
+  position: relative;
+  width: 100%;
+  height: 400px;
+  background-color: #f0f0f0;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+  border-radius: 8px;
+}
+
+.seat {
+  position: absolute;
+  cursor: pointer;
+}
+
+.seat-icon {
+  width: 24px;
+  height: 24px;
 }
 </style>
