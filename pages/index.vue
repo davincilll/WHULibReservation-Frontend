@@ -3,7 +3,7 @@
     <v-main>
       <v-container class="fill-height pa-0" fluid>
         <v-img
-            src="../assets/whu.jpg"
+            src="../assets/lib.svg"
             cover
             height="100vh"
         >
@@ -14,7 +14,9 @@
                   elevation="0"
                   color="transparent"
               >
-                <v-card-title class="text-h2 text-center text-white mb-6">Lib</v-card-title>
+              <v-card-title class="text-center mb-6 logo-container">
+      <img src="../assets/whu.svg" alt="W" class="logo" />
+    </v-card-title>
                 <v-form @submit.prevent="handleLogin">
                   <v-text-field
                       v-model="user.username"
@@ -95,10 +97,12 @@ export default {
 <style>
 .transparent-input {
   background: rgba(255, 255, 255, 0.1) !important;
+  opacity: 0.5 !important;
+
 }
 
 .transparent-input .v-field__outline {
-  opacity: 0.9 !important;
+  opacity: 0.5 !important;
 }
 
 .transparent-input .v-field__input {
@@ -113,10 +117,21 @@ export default {
   background: rgba(255, 255, 255, 0.2) !important;
   color: white !important;
   transition: all 0.3s ease;
-  opacity: 0.5 !important;
+  opacity: 0. !important;
 }
 
 .transparent-button:hover {
   background: rgba(255, 255, 255, 0.3) !important;
+}
+.logo-container {
+  display: flex; /* 使用 Flexbox 布局 */
+  justify-content: center; /* 水平居中对齐 */
+  align-items: center; /* 垂直居中对齐 */
+}
+
+.logo {
+  width: 130px; /* 设置 SVG 的宽度 */
+  height: auto; /* 保持宽高比 */
+  margin: 0 5px; /* 设置图标之间的间距 */
 }
 </style>
