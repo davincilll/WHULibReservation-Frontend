@@ -95,30 +95,42 @@
         ></v-pagination>
       </v-card-actions>
     </v-card>
-          <v-dialog v-model="seatDialog" max-width="800">
-          <v-card>
+    <v-dialog v-model="seatDialog" max-width="800">
+        <v-card>
           <v-card-title class="text-h5">座位布局</v-card-title>
+          <div class="legend">
+            <div class="legend-item" v-for="legend in seatLegends" :key="legend.status">
+              <v-img :src="legend.icon" alt="状态图标" class="legend-icon"></v-img>
+              <span class="legend-text">{{ legend.description }}</span>
+            </div>
+          </div>
           <v-card-text>
-          <div class="seat-layout">
-          <!-- 根据布局显示座位 -->
-          <div
-          v-for="seatLayout in layout"
-          :key="seatLayout.id"
-          class="seat"
-          :style="{ top: seatLayout.y + 'px', left: seatLayout.x + 'px' }"
-          @click="handleSeatClick(seatLayout)"
-          >
-          <!-- 获取对应的座位状态和编号 -->
-          <v-img :src="getSeatIcon(getSeatStatus(seatLayout.id))" alt="seat" class="seat-icon" ></v-img>
-          <!-- 渲染座位编号 -->
-          <!-- <div class="seat-number">{{ getSeatNumber(seatLayout.id) }}</div> -->
-          </div>
-          </div>
+            <div
+              class="seat-layout"
+              @wheel="handleWheelZoom"
+              @touchstart="handleTouchStart"
+              @touchmove="handleTouchMove"
+            >
+              <!-- 根据布局显示座位 -->
+              <div
+                v-for="seatLayout in layout"
+                :key="seatLayout.id"
+                class="seat"
+                :style="{ top: seatLayout.y * scale + 'px', left: seatLayout.x * scale + 'px', transform: 'scale(' + scale + ')' }"
+                @click="handleSeatClick(seatLayout)"
+              >
+                <!-- 座位状态图标 -->
+                <v-img :src="getSeatIcon(getSeatStatus(seatLayout.id))" alt="seat" class="seat-icon"></v-img>
+                
+                <!-- 座位编号 -->
+                <div class="seat-number">{{ formatSeatNumber(seatLayout.id) }}</div>
+              </div>
+            </div>
           </v-card-text>
-      <v-card-actions>
-      <v-btn text @click="seatDialog = false">关闭</v-btn>
-      </v-card-actions>
-      </v-card>
+          <v-card-actions>
+            <v-btn text @click="seatDialog = false">关闭</v-btn>
+          </v-card-actions>
+        </v-card>
       </v-dialog>
   </v-container>
   </div>
@@ -126,7 +138,6 @@
 
 <script>
 import { ref, computed, toRaw } from 'vue';
-
 export default {
   setup() {
     const data = ref([])
@@ -155,6 +166,50 @@ export default {
       { name: '主馆考试季24小时', value: '13' },
     ]);
     const floors = ref([]);
+    const scale = ref(1); // 缩放比例
+    const seatLegends = ref([
+      { status: 'idle', icon: '/idle.svg', description: '空闲' },
+      { status: 'inuse', icon: '/usre.svg', description: '使用中' },
+      { status: 'leave', icon: '/leave.svg', description: '暂离' },
+      { status: 'agreement', icon: '/agreement.svg', description: '已预约' },
+      { status: 'idle_computer', icon: '/idle_computer', description: '空闲(有电脑)' },
+      { status: 'inuse_computer', icon: '/inuse_computer.svg', description: '使用中(有电脑)' },
+      { status: 'inuse_power', icon: '/inuse_power.svg', description: '使用中(有电源)' },
+      { status: 'idle_power', icon: '/inuse_power.svg', description: '空闲(有电源)' },
+      { status: 'noUsre', icon: '/noUsre.svg', description: '无法使用' },
+    ]);
+    const initialDistance = ref(0); // 双指缩放的初始距离
+    const handleTouchStart = (event) => {
+      if (event.touches.length === 2) {
+        const [touch1, touch2] = event.touches;
+        const distance = Math.sqrt(
+          Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2)
+        );
+        initialDistance.value = distance;
+      }
+    };
+
+    const handleTouchMove = (event) => {
+      if (event.touches.length === 2) {
+        const [touch1, touch2] = event.touches;
+        const distance = Math.sqrt(
+          Math.pow(touch2.pageX - touch1.pageX, 2) + Math.pow(touch2.pageY - touch1.pageY, 2)
+        );
+        const scaleFactor = distance / initialDistance.value;
+        scale.value = Math.min(Math.max(scale.value * scaleFactor, 0.5), 3); // 限制缩放范围
+        initialDistance.value = distance;
+      }
+    };
+
+    // 鼠标滚轮缩放事件处理
+    const handleWheelZoom = (event) => {
+      const zoomFactor = 0.1; // 缩放系数
+      if (event.deltaY < 0) {
+        scale.value = Math.min(scale.value + zoomFactor, 3); // 放大
+      } else {
+        scale.value = Math.max(scale.value - zoomFactor, 0.5); // 缩小
+      }
+    };
     // 模拟点击按钮查找座位
     const handleSeatQuery = (id) => {
       parmars1.value.room = id;
@@ -163,6 +218,10 @@ export default {
         seatDialog.value = true;
       });
       layout.value = layouts[id];
+    };
+    // 格式化座位编号
+    const formatSeatNumber = (id) => {
+      return id.toString().padStart(3, '0');
     };
     const getSeatIcon = (status) => {
       switch (status) {
@@ -194,7 +253,8 @@ export default {
     };
     const getSeatStatus = (id) => {
       // 根据座位ID获取座位状态
-      const seat = seats.value.find((s) => s.Id === id);
+      const seat = seats.value.find((s) => s.SeatNumber=== Number(id));
+
       return seat ? seat.Status : 'unknown'; // 如果找不到座位，返回未知状态
     };
         // 处理点击座位事件
@@ -319,10 +379,12 @@ export default {
       layout,
       seats,
       selectedSeat,
-  
-
-      
-
+      scale,
+      handleWheelZoom,
+      handleTouchStart,
+      handleTouchMove,
+      formatSeatNumber,
+      seatLegends, 
     };
   },
 };
@@ -359,5 +421,29 @@ export default {
 .seat-icon {
   width: 24px;
   height: 24px;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap; /* 自动换行 */
+  justify-content: space-around;
+  margin-top: 20px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  margin: 5px 10px; /* 控制每个图例项的间距 */
+  flex-basis: 45%; /* 每行最多显示两个图例项 */
+}
+
+.legend-icon {
+  width: 20px; /* 缩小图标的大小 */
+  height: 20px;
+  margin-right: 6px;
+}
+
+.legend-text {
+  font-size: 12px; /* 缩小文字的大小 */
+  color: #333;
 }
 </style>

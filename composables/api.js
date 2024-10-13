@@ -66,7 +66,6 @@ export const GetApi = (url, params = {}, options = {}) => {
             params,  // 将数据序列化为 JSON
             ...options  // 允许外部传递其他配置
         }).then((res) => {
-            // console.log(res);
             if (res && res.data._value) {
                 if(res.data._value.code === 200){
                     resolve(res.data._rawValue.data);
