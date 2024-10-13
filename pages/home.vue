@@ -84,15 +84,15 @@
       </v-card-text>
 
       <!-- 分页 -->
-      <v-card-actions class="justify-center mt-6">
-        <v-pagination
-          v-if="paginatedFilteredData.length > 0"
-          v-model="currentPage"
-          :length="totalPages"
-          rounded="circle"
-          color="teal-darken-1"
-        ></v-pagination>
-      </v-card-actions>
+  <v-pagination
+    v-show="paginatedFilteredData.length > 0"
+    v-model="currentPage"
+    :length="totalPages"
+    rounded="circle"
+    color="teal-darken-1"
+    class="mb-10"
+  ></v-pagination>
+
     </v-card>
     <v-dialog v-model="seatDialog" max-width="800">
         <v-card>
