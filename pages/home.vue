@@ -33,7 +33,6 @@
             density="comfortable"
             class="rounded-lg"
             :disabled="!parmars.building"
-            @update:model-value="handleFloorChange"
           ></v-select>
       </v-row>
     </v-card-text>
@@ -97,7 +96,7 @@
     </v-card>
     <v-dialog v-model="seatDialog" max-width="800">
         <v-card>
-          <v-card-title class="text-h5">座位布局</v-card-title>
+          <v-card-title class="text-h5">{{ selectedRoomName}}座位布局</v-card-title>
           <div class="legend">
             <div class="legend-item" v-for="legend in seatLegends" :key="legend.status">
               <v-img :src="legend.icon" alt="状态图标" class="legend-icon"></v-img>
@@ -146,6 +145,7 @@ export default {
     const currentPage = ref(1); // 当前页码
     const seats = ref([]); // 座位数据
     const seatDialog = ref(false); // 控制座位弹窗
+    const selectedRoomName = ref('');
     const selectedSeat = ref(null); // 记录当前点击的座位
     const layout = ref([]); // 存储布局信息 (id, x, y 坐标)
     const parmars = ref({
@@ -172,10 +172,10 @@ export default {
       { status: 'inuse', icon: '/usre.svg', description: '使用中' },
       { status: 'leave', icon: '/leave.svg', description: '暂离' },
       { status: 'agreement', icon: '/agreement.svg', description: '已预约' },
-      { status: 'idle_computer', icon: '/idle_computer', description: '空闲(有电脑)' },
+      { status: 'idle_computer', icon: '/idle_computer.svg', description: '空闲(有电脑)' },
       { status: 'inuse_computer', icon: '/inuse_computer.svg', description: '使用中(有电脑)' },
       { status: 'inuse_power', icon: '/inuse_power.svg', description: '使用中(有电源)' },
-      { status: 'idle_power', icon: '/inuse_power.svg', description: '空闲(有电源)' },
+      { status: 'idle_power', icon: '/idle_power.svg', description: '空闲(有电源)' },
       { status: 'noUsre', icon: '/noUsre.svg', description: '无法使用' },
     ]);
     const initialDistance = ref(0); // 双指缩放的初始距离
@@ -218,6 +218,7 @@ export default {
         seatDialog.value = true;
       });
       layout.value = layouts[id];
+      selectedRoomName.value = getRoomName(id);
     };
     // 格式化座位编号
     const formatSeatNumber = (id) => {
@@ -257,6 +258,10 @@ export default {
 
       return seat ? seat.Status : 'unknown'; // 如果找不到座位，返回未知状态
     };
+    const getRoomName = (id)=>{
+      const room = data.value.find((s) => s.Id=== Number(id));
+      return room.Name
+    }
         // 处理点击座位事件
     const handleSeatClick = (seat) => {
       selectedSeat.value = seat; // 可以在这里处理座位点击事件，比如展示详细信息
@@ -271,8 +276,6 @@ export default {
       const end = start + itemsPerPage;
       return data.value.slice(start, end);
     });
-    let isInitialized = false;
-    let isManualFloorChange = false;
     // 根据建筑类型更新楼层
     const handleBuildingChange = () => {
       let floorOptions = [];
@@ -291,12 +294,16 @@ export default {
             { label: '一层', value: '1' },
             { label: '二层', value: '2' },
             { label: '三层', value: '3' },
+            { label: '四层', value: '4' },
+            { label: '五层', value: '5' },
           ];
           break;
         case '3': // 医学分馆
           floorOptions = [
             { label: '二层', value: '2' },
             { label: '三层', value: '3' },
+            { label: '四层', value: '4' },
+            { label: '五层', value: '5' },
           ];
           break;
         case '4': // 总馆
@@ -321,26 +328,38 @@ export default {
       }
       floors.value = floorOptions;
       if (floors.value.length > 0) {
-        isManualFloorChange = false;
         parmars.value.floor = floors.value[0].value;
+        // handleFloorChange();
       }
-            // 如果是初始化阶段，则允许发起请求
-        if (!isInitialized) {
-          handleFloorChange();
-        }
+    
     };
+    let isInitialized = false;
     const handleFloorChange = () => {
-    if (!isInitialized|| isManualFloorChange) {
-        GetApi('/roomQuery', parmars).then((res) => {
+      console.log("handleFloorChange执行了")
+      data.value = [];
+        GetApi('/roomQuery', parmars,{}).then((res) => {
             data.value = toRaw(res.data) || [];
+            console.log("getapi执行了")
+
         });
-    } 
-};
+    };
+    watch(() => parmars.value.floor, (newVal, oldVal) => {
+  if (newVal !== oldVal) {
+    // 只有楼层变化时才发出请求
+    console.log("watch执行了")
+
+    handleFloorChange();
+  }
+});
   onMounted(() => {
       // 默认选择第一个建筑
+      if (!isInitialized) {
+      console.log("onMounted执行了")
         parmars.value.building = buildings.value[0].value;
         handleBuildingChange()
         isInitialized = true;
+      }
+
     });
     const layouts = {
   '15': [
@@ -385,6 +404,8 @@ export default {
       handleTouchMove,
       formatSeatNumber,
       seatLegends, 
+      getRoomName,
+      selectedRoomName,
     };
   },
 };
@@ -424,26 +445,34 @@ export default {
 }
 .legend {
   display: flex;
-  flex-wrap: wrap; /* 自动换行 */
-  justify-content: space-around;
-  margin-top: 20px;
+  flex-wrap: wrap;
+  justify-content: flex-start; /* 图例项从左到右排列 */
+  padding: 0 10px; /* 控制整个图例区域的左右边距 */
+  gap: 10px; /* 控制图例项之间的间距 */
 }
 
 .legend-item {
   display: flex;
-  align-items: center;
-  margin: 5px 10px; /* 控制每个图例项的间距 */
-  flex-basis: 45%; /* 每行最多显示两个图例项 */
+  flex-direction: column;
+  align-items: center; /* 图标和文字居中对齐 */
+  flex-basis: 18%; /* 每个图例项占据 18% 的宽度，确保每行最多显示五个 */
 }
 
 .legend-icon {
-  width: 20px; /* 缩小图标的大小 */
-  height: 20px;
-  margin-right: 6px;
+  width: 14px;
+  height: 14px;
+  margin-bottom: 5px; /* 图标和文字之间的间距 */
 }
 
 .legend-text {
-  font-size: 12px; /* 缩小文字的大小 */
+  font-size: 12px; /* 控制文字大小 */
   color: #333;
+  text-align: center; /* 文字居中对齐 */
+}
+
+@media (max-width: 600px) {
+  .legend-item {
+    flex-basis: 15%; /* 在小屏幕上每行最多显示两个图例 */
+  }
 }
 </style>

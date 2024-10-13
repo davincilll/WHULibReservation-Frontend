@@ -6,9 +6,9 @@ export const apiCore = async(url, options = {}) => {
     return useFetch(url, {
         
         baseURL: config.public.baseURL,
-        // key:md5(obj.url+(queryData||bodyData)??(JSON.stringify(queryData||bodyData))),
         ...options,
         onRequest({ options }) {
+            console.log('Request initiated:', options);
             let token = userStore().getToken();
             options.headers = {
                 ...options.headers,
@@ -17,6 +17,7 @@ export const apiCore = async(url, options = {}) => {
         },
         onResponse({response}){
             //2xx以内
+            console.log("我收到回复了")
             if (response.status>=200&&response.status<300){
                 if(response._data.code !==200){
                     if(import.meta.client){
@@ -71,6 +72,7 @@ export const GetApi = (url, params = {}, options = {}) => {
                     resolve(res.data._rawValue.data);
                 }
               }
+              reject(res.data._value);
         }).catch((err) => reject(err));
     });
 };
