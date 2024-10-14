@@ -79,7 +79,7 @@ export default {
     const userStoreInstance = userStore();
     const handleLogin = () => {
       PostApi('/login', user.value).then(res => {
-        userStoreInstance.setToken(res.data.token);
+        userStoreInstance.setToken(res.token);
         useNuxtApp().$toast.success(res.msg);
         router.push('/home');
       })

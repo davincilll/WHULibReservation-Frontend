@@ -1,5 +1,5 @@
 # 使用 Node.js 官方镜像作为基础镜像
-FROM im.myhk.fun/dockerproxy/library/node:latest
+FROM im.myhk.fun/dockerproxy/library/node:20
 
 # 设置工作目录
 WORKDIR /app
