@@ -248,17 +248,18 @@ export default {
     });
     const layouts = {
   '15': [
-    { id: '1', x: 50, y: 50 },
-    { id: '3', x: 150, y: 50 },
-    { id: '7', x: 50, y: 150 },
-    { id: '4', x: 250, y: 50 },
-    { id: '6', x: 350, y: 50 },
-    { id: '10', x: 150, y: 150 },
-    { id: '11', x: 250, y: 150 },
-    { id: '5', x: 350, y: 150 },
-    { id: '12', x: 50, y: 250 },
-    { id: '7', x: 150, y: 250 },
-    { id: '8', x: 250, y: 250 },
+    { id: '1', x: 50, y: 25 },
+    { id: '3', x: 165, y: 25 },
+    { id: '2', x: 110, y: 75 },
+    { id: '9', x: 865, y: 225 },
+    { id: '4', x: 515, y: 25 },
+    { id: '6', x: 635, y: 25 },
+    { id: '10', x: 285, y: 225 },
+    { id: '11', x: 345, y: 175 },
+    { id: '5', x: 575, y: 75 },
+    { id: '12', x: 400, y: 225 },
+    { id: '7', x: 750, y: 225 },
+    { id: '8', x: 805, y: 175 },
   ]
 };
 
@@ -335,7 +336,7 @@ export default {
       }
       floors.value = floorOptions;
 
-      // parmars.value.floor = floors.value[0].value; // 设置为默认第一层
+      parmars.value.floor = floors.value[0].value; // 设置为默认
       await handleFloorChange()
       }else{
         await handleFloorChange()
@@ -371,7 +372,6 @@ export default {
   onMounted(() => {
       // 默认选择第一个建筑
         parmars.value.building = buildings.value[0].value;
-        parmars.value.floor = "1"; // 设置为默认第一层
         handleBuildingChange(true)
        
               watch(
@@ -380,7 +380,7 @@ export default {
           // 在这里处理 building 和 floor 的变化
           if (newBuilding !== oldBuilding) {
             handleBuildingChange(true); // 处理建筑物变化
-          }else if (newFloor !== oldFloor && oldFloor !== undefined) {
+          }else if (newFloor !== oldFloor && oldFloor !== undefined && parmars.value.building !== '7'&& parmars.value.building !== '13') {
             handleBuildingChange(false); // 处理楼层变化
           }
         }
@@ -441,6 +441,7 @@ export default {
 }
 .seat-layout {
   position: relative;
+  overflow: scroll;
   width: 100%;
   height: 400px;
   background-color: #f0f0f0;
