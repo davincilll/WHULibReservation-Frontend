@@ -14,9 +14,9 @@
                   elevation="0"
                   color="transparent"
               >
-              <v-card-title class="text-center mb-6 logo-container">
-      <img src="../assets/whu.svg" alt="W" class="logo" />
-    </v-card-title>
+                <v-card-title class="text-center mb-6 logo-container">
+                  <img src="../assets/whu.svg" alt="W" class="logo"/>
+                </v-card-title>
                 <v-form @submit.prevent="handleLogin">
                   <v-text-field
                       v-model="user.username"
@@ -79,7 +79,7 @@ export default {
     const userStoreInstance = userStore();
     const handleLogin = () => {
       PostApi('/login', user.value).then(res => {
-        userStoreInstance.setToken(res.data.token);
+        userStoreInstance.setToken(res.token);
         useNuxtApp().$toast.success(res.msg);
         router.push('/home');
       })
@@ -123,6 +123,7 @@ export default {
 .transparent-button:hover {
   background: rgba(255, 255, 255, 0.3) !important;
 }
+
 .logo-container {
   display: flex; /* 使用 Flexbox 布局 */
   justify-content: center; /* 水平居中对齐 */

@@ -1,0 +1,31 @@
+# Node.js dependencies
+node_modules
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+.nuxt
+dist
+*.log
+
+.output
+.data
+.nitro
+.cache
+
+# Local environment files
+.env
+.env.local
+.env.*.local
+
+# Git
+.git
+.gitignore
+
+# Logs
+logs
+
+# Misc
+.DS_Store
+.fleet
+.idea
