@@ -92,7 +92,7 @@
   ></v-pagination>
 
     </v-card>
-    <v-dialog v-model="seatDialog" max-width="800">
+    <v-dialog v-model="seatDialog">
         <v-card>
           <v-card-title class="text-h5">{{ selectedRoomName}}座位布局</v-card-title>
           <div class="legend">
@@ -135,6 +135,7 @@
 
 <script>
 import { ref, computed, toRaw } from 'vue';
+import { layouts } from '~/data/layouts';
 export default {
   setup() {
     //分页以及数据显示相关
@@ -246,22 +247,7 @@ export default {
       const end = start + itemsPerPage;
       return data.value.slice(start, end);
     });
-    const layouts = {
-  '15': [
-    { id: '1', x: 50, y: 25 },
-    { id: '3', x: 165, y: 25 },
-    { id: '2', x: 110, y: 75 },
-    { id: '9', x: 865, y: 225 },
-    { id: '4', x: 515, y: 25 },
-    { id: '6', x: 635, y: 25 },
-    { id: '10', x: 285, y: 225 },
-    { id: '11', x: 345, y: 175 },
-    { id: '5', x: 575, y: 75 },
-    { id: '12', x: 400, y: 225 },
-    { id: '7', x: 750, y: 225 },
-    { id: '8', x: 805, y: 175 },
-  ]
-};
+
 
     const test = (value) => {
       console.log(value)
