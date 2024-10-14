@@ -88,7 +88,7 @@ import { ref, toRaw, computed, onMounted } from 'vue'
 export default {
   setup() {
     const data = ref([]) // 全部数据
-    const itemsPerPage = 4 // 每页显示条目数
+    const itemsPerPage = 6 // 每页显示条目数
     const currentPage = ref(1) // 当前页码
     const selectedHistoryType = ref(null) // 筛选的状态
 

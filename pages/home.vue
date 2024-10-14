@@ -21,7 +21,7 @@
 
         <!-- 楼层筛选 -->
         
-          <!-- <v-select
+         <v-select
             v-model="parmars.floor"
             :items="floors"
             item-title="label"
@@ -31,9 +31,7 @@
             density="comfortable"
             class="rounded-lg"
             :disabled="!parmars.building"
-            @change="handleBuildingChange(false)"
-
-          ></v-select> -->
+          ></v-select> 
       </v-row>
     </v-card-text>
 
@@ -283,7 +281,7 @@ export default {
       { name: '主馆考试季24小时', value: '13' },
     ]);
     
-    const handleBuildingChange = (flag) => {
+    const handleBuildingChange = async(flag) => {
       console.log("handleBuildingChange执行了")
       if (flag) {
         
@@ -337,12 +335,12 @@ export default {
       }
       floors.value = floorOptions;
 
-      parmars.value.floor = floors.value[0].value; // 设置为默认第一层
-      handleFloorChange()
+      // parmars.value.floor = floors.value[0].value; // 设置为默认第一层
+      await handleFloorChange()
       }else{
-        handleFloorChange()
+        await handleFloorChange()
       }
-            console.log("handleBuildingChange执行完了")
+           
     };
     
     //房间相关
@@ -352,17 +350,11 @@ export default {
     });
     const floors = ref([]);
     const handleFloorChange = async() => {
-      console.log("handleFloorChange执行了")
-      data.value = [];
-      console.log("getapi执行了:")
-
-        await GetApi('/roomQuery', parmars,{}).then((res) => {
-            // console.log("res:",res)
-            data.value = toRaw(res.data) || [];
-            console.log("getapi执行完了:",data.value)
+        data.value = [];
+        await GetApi('/roomQuery', parmars.value,{}).then((res) => {
+            data.value = res.data || [];
         });
         
-      console.log("handleFloorChange执行完了")
       return
     };
 
@@ -374,24 +366,27 @@ export default {
       selectedSeat.value = seat; // 可以在这里处理座位点击事件，比如展示详细信息
       console.log('Seat clicked:', seat);
     };
-   
+  
 
-    let watchRegistered = false;
   onMounted(() => {
       // 默认选择第一个建筑
-      console.log("onMounted执行了")
         parmars.value.building = buildings.value[0].value;
+        parmars.value.floor = "1"; // 设置为默认第一层
         handleBuildingChange(true)
-        if (!watchRegistered) {
-        watch(() => parmars.value.building, (newVal, oldVal) => {
-            if (newVal !== oldVal) {
-              // 只有楼层变化时才发出请求
-              console.log("watch执行了")
-              handleBuildingChange(true);
-              console.log("watch执行完了")
-            }});
-            watchRegistered = true; 
-      }
+       
+              watch(
+        [() => parmars.value.building, () => parmars.value.floor],
+        ([newBuilding, newFloor], [oldBuilding, oldFloor]) => {
+          // 在这里处理 building 和 floor 的变化
+          if (newBuilding !== oldBuilding) {
+            handleBuildingChange(true); // 处理建筑物变化
+          }else if (newFloor !== oldFloor && oldFloor !== undefined) {
+            handleBuildingChange(false); // 处理楼层变化
+          }
+        }
+      );
+
+
     });
 
 
