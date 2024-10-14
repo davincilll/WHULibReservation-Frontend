@@ -19,9 +19,9 @@ export const apiCore = async(url, options = {}) => {
             //2xx以内
             console.log("我收到回复了")
             if (response.status>=200&&response.status<300){
+                console.log(response._data);
                 if(response._data.code !==200){
                     if(import.meta.client){
-                        // console.log(response._data.msg);
                         nuxtApp.$toast.error(response._data.msg);
                     }else{
                         nuxtApp.runWithContext(()=>{
@@ -56,6 +56,7 @@ export const apiCore = async(url, options = {}) => {
         },
         ...options,
     });
+    
 };
 export const GetApi = (url, params = {}, options = {}) => {
     return new Promise((resolve, reject) => {

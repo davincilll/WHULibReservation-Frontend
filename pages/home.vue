@@ -7,23 +7,21 @@
       <v-card-text>
       <v-row class="mt-1 d-flex align-center">
         <!-- 建筑筛选 -->
-    
           <v-select
             v-model="parmars.building"
             :items="buildings"
-            item-title="name"
             item-value="value"
+            item-title="name"
             label="选择建筑"
             variant="outlined"
             density="comfortable"
             class="rounded-lg"
-            @update:model-value="handleBuildingChange"
           ></v-select>
       
 
         <!-- 楼层筛选 -->
         
-          <v-select
+          <!-- <v-select
             v-model="parmars.floor"
             :items="floors"
             item-title="label"
@@ -33,7 +31,9 @@
             density="comfortable"
             class="rounded-lg"
             :disabled="!parmars.building"
-          ></v-select>
+            @change="handleBuildingChange(false)"
+
+          ></v-select> -->
       </v-row>
     </v-card-text>
 
@@ -139,33 +139,14 @@
 import { ref, computed, toRaw } from 'vue';
 export default {
   setup() {
-    const data = ref([])
+    //分页以及数据显示相关
     const today = new Date().toISOString().substring(0, 10)
     const itemsPerPage = 4; // 每页显示条目数
     const currentPage = ref(1); // 当前页码
-    const seats = ref([]); // 座位数据
     const seatDialog = ref(false); // 控制座位弹窗
     const selectedRoomName = ref('');
     const selectedSeat = ref(null); // 记录当前点击的座位
     const layout = ref([]); // 存储布局信息 (id, x, y 坐标)
-    const parmars = ref({
-      building: '',
-      floor: '',
-      Ondate:today,
-    });
-    const parmars1 = ref({
-      room: '',
-      Ondate:today,
-    });
-    const buildings = ref([
-      { name: '信息分馆', value: '1' },
-      { name: '工学分馆', value: '2' },
-      { name: '医学分馆', value: '3' },
-      { name: '总馆', value: '4' },
-      { name: '信息分馆考试季24小时', value: '7' },
-      { name: '主馆考试季24小时', value: '13' },
-    ]);
-    const floors = ref([]);
     const scale = ref(1); // 缩放比例
     const seatLegends = ref([
       { status: 'idle', icon: '/idle.svg', description: '空闲' },
@@ -188,7 +169,6 @@ export default {
         initialDistance.value = distance;
       }
     };
-
     const handleTouchMove = (event) => {
       if (event.touches.length === 2) {
         const [touch1, touch2] = event.touches;
@@ -200,7 +180,6 @@ export default {
         initialDistance.value = distance;
       }
     };
-
     // 鼠标滚轮缩放事件处理
     const handleWheelZoom = (event) => {
       const zoomFactor = 0.1; // 缩放系数
@@ -255,29 +234,59 @@ export default {
     const getSeatStatus = (id) => {
       // 根据座位ID获取座位状态
       const seat = seats.value.find((s) => s.SeatNumber=== Number(id));
-
       return seat ? seat.Status : 'unknown'; // 如果找不到座位，返回未知状态
     };
     const getRoomName = (id)=>{
       const room = data.value.find((s) => s.Id=== Number(id));
       return room.Name
     }
-        // 处理点击座位事件
-    const handleSeatClick = (seat) => {
-      selectedSeat.value = seat; // 可以在这里处理座位点击事件，比如展示详细信息
-      console.log('Seat clicked:', seat);
-    };
     // 计算总页数
     const totalPages = computed(() => Math.ceil(data.value.length / itemsPerPage));
-
     // 获取当前页的数据 (通过分页)
     const paginatedFilteredData = computed(() => {
       const start = (currentPage.value - 1) * itemsPerPage;
       const end = start + itemsPerPage;
       return data.value.slice(start, end);
     });
-    // 根据建筑类型更新楼层
-    const handleBuildingChange = () => {
+    const layouts = {
+  '15': [
+    { id: '1', x: 50, y: 50 },
+    { id: '3', x: 150, y: 50 },
+    { id: '7', x: 50, y: 150 },
+    { id: '4', x: 250, y: 50 },
+    { id: '6', x: 350, y: 50 },
+    { id: '10', x: 150, y: 150 },
+    { id: '11', x: 250, y: 150 },
+    { id: '5', x: 350, y: 150 },
+    { id: '12', x: 50, y: 250 },
+    { id: '7', x: 150, y: 250 },
+    { id: '8', x: 250, y: 250 },
+  ]
+};
+
+    const test = (value) => {
+      console.log(value)
+    }
+    //建筑相关
+    const data = ref([])
+    const parmars = ref({
+      building: '',
+      floor: '',
+      Ondate:today,
+    });
+    const buildings = ref([
+      { name: '信息分馆', value: '1' },
+      { name: '工学分馆', value: '2' },
+      { name: '医学分馆', value: '3' },
+      { name: '总馆', value: '4' },
+      { name: '信息分馆考试季24小时', value: '7' },
+      { name: '主馆考试季24小时', value: '13' },
+    ]);
+    
+    const handleBuildingChange = (flag) => {
+      console.log("handleBuildingChange执行了")
+      if (flag) {
+        
       let floorOptions = [];
       switch (parmars.value.building) {
         case '1': // 信息分馆
@@ -327,59 +336,69 @@ export default {
           floorOptions = [];
       }
       floors.value = floorOptions;
-      if (floors.value.length > 0) {
-        parmars.value.floor = floors.value[0].value;
-        // handleFloorChange();
+
+      parmars.value.floor = floors.value[0].value; // 设置为默认第一层
+      handleFloorChange()
+      }else{
+        handleFloorChange()
       }
-    
+            console.log("handleBuildingChange执行完了")
     };
-    let isInitialized = false;
-    const handleFloorChange = () => {
+    
+    //房间相关
+    const parmars1 = ref({
+      room: '',
+      Ondate:today,
+    });
+    const floors = ref([]);
+    const handleFloorChange = async() => {
       console.log("handleFloorChange执行了")
       data.value = [];
-        GetApi('/roomQuery', parmars,{}).then((res) => {
+      console.log("getapi执行了:")
+
+        await GetApi('/roomQuery', parmars,{}).then((res) => {
+            // console.log("res:",res)
             data.value = toRaw(res.data) || [];
-            console.log("getapi执行了")
-
+            console.log("getapi执行完了:",data.value)
         });
+        
+      console.log("handleFloorChange执行完了")
+      return
     };
-    watch(() => parmars.value.floor, (newVal, oldVal) => {
-  if (newVal !== oldVal) {
-    // 只有楼层变化时才发出请求
-    console.log("watch执行了")
 
-    handleFloorChange();
-  }
-});
+    
+    //座位相关
+    const seats = ref([]); // 座位数据
+    // 处理点击座位事件
+    const handleSeatClick = (seat) => {
+      selectedSeat.value = seat; // 可以在这里处理座位点击事件，比如展示详细信息
+      console.log('Seat clicked:', seat);
+    };
+   
+
+    let watchRegistered = false;
   onMounted(() => {
       // 默认选择第一个建筑
-      if (!isInitialized) {
       console.log("onMounted执行了")
         parmars.value.building = buildings.value[0].value;
-        handleBuildingChange()
-        isInitialized = true;
+        handleBuildingChange(true)
+        if (!watchRegistered) {
+        watch(() => parmars.value.building, (newVal, oldVal) => {
+            if (newVal !== oldVal) {
+              // 只有楼层变化时才发出请求
+              console.log("watch执行了")
+              handleBuildingChange(true);
+              console.log("watch执行完了")
+            }});
+            watchRegistered = true; 
       }
-
     });
-    const layouts = {
-  '15': [
-    { id: '1', x: 50, y: 50 },
-    { id: '3', x: 150, y: 50 },
-    { id: '7', x: 50, y: 150 },
-    { id: '4', x: 250, y: 50 },
-    { id: '6', x: 350, y: 50 },
-    { id: '10', x: 150, y: 150 },
-    { id: '11', x: 250, y: 150 },
-    { id: '5', x: 350, y: 150 },
-    { id: '12', x: 50, y: 250 },
-    { id: '7', x: 150, y: 250 },
-    { id: '8', x: 250, y: 250 },
-  ]
-};
+
 
     
     return {
       data,
+      test,
       today,
       currentPage,
       totalPages,
@@ -410,6 +429,7 @@ export default {
   },
 };
 </script>
+
 <style scoped>
 .v-card {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
