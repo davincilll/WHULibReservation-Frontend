@@ -1,27 +1,29 @@
-# 使用 Node.js 官方镜像作为基础镜像
-FROM im.myhk.fun/dockerproxy/library/node:20
+# use node 16 alpine image as build image
+FROM im.myhk.fun/dockerproxy/library/node:20-alpine AS builder
 
-# 设置工作目录
+# create work directory in app folder
 WORKDIR /app
 
-# 复制项目文件
-COPY . .
+# copy over all files to the work directory
+ADD . .
 
-
-# 安装依赖
+# install all depencies
 RUN yarn install
 
+# build the project
+RUN yarn run build
 
+# start final image
+FROM im.myhk.fun/dockerproxy/library/node:20-alpine
 
-# 构建 Nuxt 应用
-RUN yarn build
+WORKDIR /app
 
-# 设置环境变量
+# copy over build files from builder step
+COPY --from=builder /app/.output  /app/.output
+
+# expose the host and port 3000 to the server
 ENV HOST=0.0.0.0
-ENV PORT=3000
-
-# 暴露应用端口
 EXPOSE 3000
 
-# 启动应用
-CMD ["yarn", "start"]
+# run the build project with node
+ENTRYPOINT ["node", ".output/server/index.mjs"]
