@@ -352,8 +352,7 @@ export default {
       console.log('Seat clicked:', seat);
     };
   
-
-  onMounted(() => {
+    onMounted(() => {
       // 默认选择第一个建筑
         parmars.value.building = buildings.value[0].value;
         handleBuildingChange(true)
