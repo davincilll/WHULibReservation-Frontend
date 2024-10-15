@@ -8,7 +8,7 @@ export default defineNuxtConfig({
     },
     runtimeConfig: {
         public: {
-            baseURL:"http://myhk.fun:8999/api/v1"
+            baseURL:"https://api.lib.myhk.fun/api/v1"
         }
     },
 
