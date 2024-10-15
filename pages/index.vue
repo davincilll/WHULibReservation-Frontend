@@ -79,7 +79,8 @@ export default {
     const userStoreInstance = userStore();
     const handleLogin = () => {
       PostApi('/login', user.value).then(res => {
-        if (res.code !== 200) {
+
+        if (!res.token) {
           return
         }
         userStoreInstance.setToken(res.token);

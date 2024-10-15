@@ -240,9 +240,7 @@ export default {
     });
 
 
-    const test = (value) => {
-      console.log(value)
-    }
+ 
     //建筑相关
     const data = ref([])
     const parmars = ref({
@@ -260,7 +258,7 @@ export default {
     ]);
     
     const handleBuildingChange = async(flag) => {
-      console.log("handleBuildingChange执行了")
+
       if (flag) {
         
       let floorOptions = [];
@@ -345,7 +343,6 @@ export default {
       const { data } = await GetApi('seatQuery', parmars1.value);
         seats.value = data || [];
         seatDialog.value = true;
-        console.log("seats:",data);
         layout.value = layouts[id];
         selectedRoomName.value = getRoomName(id);
     };
