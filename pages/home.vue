@@ -17,10 +17,10 @@
             density="comfortable"
             class="rounded-lg"
           ></v-select>
-      
+
 
         <!-- 楼层筛选 -->
-        
+
          <v-select
             v-model="parmars.floor"
             :items="floors"
@@ -31,7 +31,7 @@
             density="comfortable"
             class="rounded-lg"
             :disabled="!parmars.building"
-          ></v-select> 
+          ></v-select>
       </v-row>
     </v-card-text>
 
@@ -64,7 +64,7 @@
                   <v-spacer></v-spacer>
                 <!-- 查找座位按钮 -->
                 <v-col cols="auto">
-                  <v-btn 
+                  <v-btn
                     color="teal-darken-1"
                     variant="elevated"
                     @click="handleSeatQuery(item.Id)"
@@ -118,7 +118,7 @@
               >
                 <!-- 座位状态图标 -->
                 <v-img :src="getSeatIcon(getSeatStatus(seatLayout.id))" alt="seat" class="seat-icon"></v-img>
-                
+
                 <!-- 座位编号 -->
                 <div class="seat-number">{{ formatSeatNumber(seatLayout.id) }}</div>
               </div>
@@ -188,7 +188,7 @@ export default {
         scale.value = Math.max(scale.value - zoomFactor, 0.5); // 缩小
       }
     };
-   
+
     // 格式化座位编号
     const formatSeatNumber = (id) => {
       return id.toString().padStart(3, '0');
@@ -240,7 +240,7 @@ export default {
     });
 
 
- 
+
     //建筑相关
     const data = ref([])
     const parmars = ref({
@@ -256,11 +256,11 @@ export default {
       { name: '信息分馆考试季24小时', value: '7' },
       { name: '主馆考试季24小时', value: '13' },
     ]);
-    
+
     const handleBuildingChange = async(flag) => {
 
       if (flag) {
-        
+
       let floorOptions = [];
       switch (parmars.value.building) {
         case '1': // 信息分馆
@@ -316,9 +316,9 @@ export default {
       }else{
         await handleFloorChange()
       }
-           
+
     };
-    
+
     //房间相关
     const parmars1 = ref({
       room: '',
@@ -333,7 +333,7 @@ export default {
       return
     };
 
-    
+
     //座位相关
     const seats = ref([]); // 座位数据
      // 模拟点击按钮查找座位
@@ -356,7 +356,7 @@ export default {
       // 默认选择第一个建筑
         parmars.value.building = buildings.value[0].value;
         handleBuildingChange(true)
-       
+
               watch(
         [() => parmars.value.building, () => parmars.value.floor],
         ([newBuilding, newFloor], [oldBuilding, oldFloor]) => {
@@ -373,7 +373,7 @@ export default {
     });
 
 
-    
+
     return {
       data,
       today,
@@ -383,7 +383,6 @@ export default {
       parmars,
       buildings,
       floors,
-      handleSeatQuery,
       handleBuildingChange,
       handleFloorChange,
       seatDialog,
@@ -399,7 +398,7 @@ export default {
       handleTouchStart,
       handleTouchMove,
       formatSeatNumber,
-      seatLegends, 
+      seatLegends,
       getRoomName,
       selectedRoomName,
     };
