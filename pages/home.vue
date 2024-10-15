@@ -191,6 +191,7 @@ export default {
     // 模拟点击按钮查找座位
     const handleSeatQuery = (id) => {
       parmars1.value.room = id;
+      console.log("room:",parmars1);
       GetApi('seatQuery', parmars1).then((res) => {
         seats.value = toRaw(res.data) || [];
         seatDialog.value = true;

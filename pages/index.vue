@@ -62,7 +62,7 @@
 
 <script>
 import {ref} from 'vue'
-
+import { jwtDecode } from 'jwt-decode';
 export default {
   setup() {
     definePageMeta({
