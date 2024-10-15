@@ -188,17 +188,7 @@ export default {
         scale.value = Math.max(scale.value - zoomFactor, 0.5); // 缩小
       }
     };
-    // 模拟点击按钮查找座位
-    const handleSeatQuery = (id) => {
-      parmars1.value.room = id;
-      console.log("room:",parmars1);
-      GetApi('seatQuery', parmars1).then((res) => {
-        seats.value = toRaw(res.data) || [];
-        seatDialog.value = true;
-      });
-      layout.value = layouts[id];
-      selectedRoomName.value = getRoomName(id);
-    };
+   
     // 格式化座位编号
     const formatSeatNumber = (id) => {
       return id.toString().padStart(3, '0');
@@ -334,7 +324,7 @@ export default {
     //房间相关
     const parmars1 = ref({
       room: '',
-      Ondate:today,
+      date:today,
     });
     const floors = ref([]);
     const handleFloorChange = async() => {
@@ -342,13 +332,23 @@ export default {
         await GetApi('/roomQuery', parmars.value,{}).then((res) => {
             data.value = res.data || [];
         });
-        
       return
     };
 
     
     //座位相关
     const seats = ref([]); // 座位数据
+     // 模拟点击按钮查找座位
+     const handleSeatQuery = async(id) => {
+      parmars1.value.room = id+'';
+      seats.value = [];
+      const { data } = await GetApi('seatQuery', parmars1.value);
+        seats.value = data || [];
+        seatDialog.value = true;
+        console.log("seats:",data);
+        layout.value = layouts[id];
+        selectedRoomName.value = getRoomName(id);
+    };
     // 处理点击座位事件
     const handleSeatClick = (seat) => {
       selectedSeat.value = seat; // 可以在这里处理座位点击事件，比如展示详细信息
