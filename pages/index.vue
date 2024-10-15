@@ -84,7 +84,17 @@ export default {
         router.push('/home');
       })
     }
-
+    onMounted(() => {
+      const token = userStoreInstance.getToken();
+      if (token) {
+        const decoded = jwtDecode(token);
+        const isExpired = decoded.exp * 1000 < Date.now();
+        if (!isExpired) {
+          //自动登陆
+          router.push('/home');
+        }
+      }
+    });
     return {
       user,
       rules,
