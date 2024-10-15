@@ -79,6 +79,9 @@ export default {
     const userStoreInstance = userStore();
     const handleLogin = () => {
       PostApi('/login', user.value).then(res => {
+        if (res.code !== 200) {
+          return
+        }
         userStoreInstance.setToken(res.token);
         useNuxtApp().$toast.success(res.msg);
         router.push('/home');
@@ -106,32 +109,31 @@ export default {
 
 <style>
 .transparent-input {
-  background: rgba(255, 255, 255, 0.1) !important;
-  opacity: 0.5 !important;
-
+  background: rgba(255, 255, 255, 0.05) !important; /* 更低的透明度 */
+  opacity: 0.9 !important; /* 更低的整体透明度 */
 }
 
 .transparent-input .v-field__outline {
-  opacity: 0.5 !important;
+  opacity: 0.9 !important; /* 更低的透明度 */
 }
 
 .transparent-input .v-field__input {
-  color: white !important;
+  color: white !important; /* 字体颜色 */
 }
 
 .transparent-input .v-label {
-  color: rgba(255, 255, 255, 0.7) !important;
+  color: rgba(255, 255, 255, 0.9) !important; /* 更低的透明度 */
 }
 
 .transparent-button {
-  background: rgba(255, 255, 255, 0.2) !important;
-  color: white !important;
+  background: rgba(255, 255, 255, 0.2) !important; /* 保持原样 */
+  color: white !important; /* 按钮字体颜色 */
   transition: all 0.3s ease;
-  opacity: 0. !important;
+  opacity: 0.7 !important; /* 更低的透明度 */
 }
 
 .transparent-button:hover {
-  background: rgba(255, 255, 255, 0.3) !important;
+  background: rgba(255, 255, 255, 0.3) !important; /* 保持原样 */
 }
 
 .logo-container {
@@ -141,7 +143,7 @@ export default {
 }
 
 .logo {
-  width: 130px; /* 设置 SVG 的宽度 */
+  width: 150px; /* 设置 SVG 的宽度 */
   height: auto; /* 保持宽高比 */
   margin: 0 5px; /* 设置图标之间的间距 */
 }

@@ -1,18 +1,23 @@
 <template>
-
 </template>
 
-<script>
+<script setup>
+import { onMounted } from 'vue'
+
+
+const route = useRoute()
+
 onMounted(() => {
-  const route = useRouter()
-  if(route.query.code){
+  if (route.query.code) {
     useNuxtApp().$toast.error(route.query.msg)
     userStore().setToken("")
-    navigateTo("/")
+    setTimeout(() => {
+      navigateTo("/")
+    }, 2000)
   }
 })
 </script>
 
 <style>
-
+/* 你的样式 */
 </style>
