@@ -377,7 +377,6 @@ export default {
     
     return {
       data,
-      test,
       today,
       currentPage,
       totalPages,
