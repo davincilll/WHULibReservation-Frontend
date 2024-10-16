@@ -1,8 +1,12 @@
 <template>
   <v-container class="pa-0">
     <v-card class="mx-auto" max-width="1200" elevation="0" color="transparent">
-      <v-card-title>{{ selectedRoomName }} 座位布局</v-card-title>
-
+      <div class="header-container" style="display: flex; align-items: center;">
+        <v-btn @click="goBack" class="back-btn" icon>
+          <v-icon class="back-btn">mdi-arrow-left</v-icon> <!-- 使用 Material Design Icons -->
+        </v-btn>
+        <v-card-title >{{ selectedRoomName }} 座位布局</v-card-title>
+      </div>
       <div class="legend">
         <div class="legend-item" v-for="legend in seatLegends" :key="legend.status">
           <v-img :src="legend.icon" alt="状态图标" class="legend-icon"></v-img>
@@ -44,10 +48,10 @@ export default {
     const route = useRoute();
     const roomId = route.params.id;
     const selectedRoomName = route.query.name;
-    const today = new Date().toISOString().substring(0, 10)
+    const dates = route.query.date;
     const parmars1 = ref({
       room: roomId,
-      date:today,
+      date:dates,
     });
 
     const selectedSeat = ref(null); // 记录当前点击的座位
@@ -115,6 +119,8 @@ export default {
           return '/agreement.svg';
         case 'inuse_computer':
           return '/inuse_computer.svg';
+        case 'idle_window_computer':
+          return '/idle_computer.svg';
         case 'idle_computer':
           return '/idle_computer.svg';
         case 'noUsre':
@@ -141,6 +147,8 @@ export default {
       seats.value = [];
       const { data } = await GetApi('seatQuery', parmars1.value);
         seats.value = data || [];
+        console.log(parmars1)
+        console.log(data);
         layout.value = layouts[roomId];
     };
     // 处理点击座位事件
@@ -151,6 +159,10 @@ export default {
     onMounted(() => {
       handleSeatQuery();
     });
+    const router = useRouter();
+    const goBack = () => {
+      router.back(); // 返回到上一页
+    };
     return {
     seatLegends,
     handleTouchStart,
@@ -165,6 +177,7 @@ export default {
     selectedSeat,
     layout,
     scale,
+    goBack
     }
 }  
 }
@@ -180,7 +193,19 @@ export default {
   margin-top: 20px;
   border-radius: 8px;
 }
+.header-container {
+  display: flex;
+  align-items: center; /* 垂直居中对齐 */
+}
 
+.back-btn {
+  min-width: 0; /* 防止按钮过大 */
+  margin-right: 8px; /* 右侧间距 */
+}
+
+.title {
+  font-size: 1.5rem; /* 调整标题字体大小 */
+}
 .seat {
   position: absolute;
   cursor: pointer;

@@ -32,6 +32,17 @@
             class="rounded-lg"
             :disabled="!parmars.building"
           ></v-select>
+
+          <v-select
+              v-model="parmars.onDate"
+              :items="dateOptions"
+              item-value="value"
+              item-title="label"
+              label="选择日期"
+              variant="outlined"
+              density="comfortable"
+              class="rounded-lg"
+            ></v-select>
       </v-row>
     </v-card-text>
 
@@ -59,7 +70,7 @@
                 <div class="d-flex justify-space-between align-center">
                   <v-card-subtitle class="d-flex align-center">
                     <v-icon icon="mdi-calendar" color="teal-lighten-1" class="ml-3"></v-icon>
-                    {{ today }}
+                    {{ parmars.onDate }}
                   </v-card-subtitle>
                   <v-spacer></v-spacer>
                 <!-- 查找座位按钮 -->
@@ -100,8 +111,19 @@
 import { ref, computed } from 'vue';
 export default {
   setup() {
+    //日期选项
+    const today = new Date().toISOString().substring(0, 10);
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowString = tomorrow.toISOString().substring(0, 10);
+
+    const dateOptions = ref([
+      { label: '今天', value: today },
+      { label: '明天', value: tomorrowString }
+    ]);
+
+    const currentHour = new Date().getHours();
     //分页以及数据显示相关
-    const today = new Date().toISOString().substring(0, 10)
     const itemsPerPage = 4; // 每页显示条目数
     const currentPage = ref(1); // 当前页码
     const router = useRouter();
@@ -121,7 +143,7 @@ export default {
     const parmars = ref({
       building: '',
       floor: '',
-      Ondate:today,
+      onDate:currentHour >= 22 ? tomorrowString : today,
     });
     const buildings = ref([
       { name: '信息分馆', value: '1' },
@@ -208,7 +230,7 @@ export default {
     const selectedRoomName = ref('');
     const goToRoomPage = (id) => {
     selectedRoomName.value = data.value.find((s) => s.Id=== Number(id));
-    router.push({path:`/room/${id}`,  query: { name: selectedRoomName.value.Name }}); // 跳转到对应房间的动态页面
+    router.push({path:`/room/${id}`,  query: { name: selectedRoomName.value.Name,date:parmars.value.onDate }}); // 跳转到对应房间的动态页面
   };
 
   
@@ -218,14 +240,15 @@ export default {
         handleBuildingChange(true)
 
               watch(
-        [() => parmars.value.building, () => parmars.value.floor],
-        ([newBuilding, newFloor], [oldBuilding, oldFloor]) => {
+        [() => parmars.value.building, () => parmars.value.floor,()=>parmars.value.onDate],
+        ([newBuilding, newFloor,newOnDate], [oldBuilding, oldFloor,oldOnDate]) => {
           // 在这里处理 building 和 floor 的变化
           if (newBuilding !== oldBuilding) {
             handleBuildingChange(true); // 处理建筑物变化
           }else if (newFloor !== oldFloor && oldFloor !== undefined && parmars.value.building !== '7'&& parmars.value.building !== '13') {
             handleBuildingChange(false); // 处理楼层变化
-          }
+          }else if(newOnDate !== oldOnDate)
+          handleFloorChange(false);
         }
       );
 
@@ -245,7 +268,8 @@ export default {
       floors,
       handleBuildingChange,
       handleFloorChange,
-      goToRoomPage
+      goToRoomPage,
+      dateOptions
     };
   },
 };
